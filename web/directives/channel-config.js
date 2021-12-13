@@ -53,6 +53,7 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
                 scope.channel = {}
                 scope.channel.programs = []
                 scope.channel.watermark = defaultWatermark();
+                scope.channel.overlay = defaultOverlay();
                 scope.channel.fillerCollections = []
                 scope.channel.guideFlexPlaceholder = "";
                 scope.channel.fillerRepeatCooldown = 30 * 60 * 1000;
@@ -94,6 +95,13 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
                     || (scope.channel.watermark.enabled !== true)
                 ) {
                     scope.channel.watermark = defaultWatermark();
+                }
+
+                if (
+                    (typeof(scope.channel.overlay) === 'undefined')
+                    || (scope.channel.overlay.enabled !== true)
+                ) {
+                    scope.channel.overlay = defaultOverlay();
                 }
 
                 if (
@@ -156,6 +164,22 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
                     verticalMargin: 0.00,
                     horizontalMargin: 0.00,
                     duration: 0,
+                }
+            }
+
+            function defaultOverlay() {
+                return {
+                    enabled: false,
+                    position: "top-right",
+                    verticalMargin: 2.00,
+                    horizontalMargin: 2.00,
+                    textSize: 3.5,
+                    labelSize: 3,
+                    lineSpacing: 1,
+                    labelAlpha: 60,
+                    textAlpha: 80,
+                    textColor: "#FFFFFF",
+                    labelColor: "#FFFFFF",
                 }
             }
 
@@ -998,6 +1022,27 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
                     } else if ( channel.watermark.enabled && notValidNumber(scope.channel.watermark.duration, 0)) {
                         scope.error.watermark = "Please include a valid watermark duration.";
                         scope.error.tab = "ffmpeg";
+                    } else if ( channel.overlay.enabled && notValidNumber(scope.channel.overlay.labelSize, 0.01,100)) {
+                        scope.error.overlay = "Please include a valid overlay label size.";
+                        scope.error.tab = "ffmpeg";
+                    } else if ( channel.overlay.enabled && notValidNumber(scope.channel.overlay.textSize, 0.01,100)) {
+                        scope.error.overlay = "Please include a valid overlay text size.";
+                        scope.error.tab = "ffmpeg";
+                    } else if ( channel.overlay.enabled && notValidNumber(scope.channel.overlay.lineSpacing, 0.01,100)) {
+                        scope.error.overlay = "Please include a valid overlay line spacing.";
+                        scope.error.tab = "ffmpeg";
+                    } else if ( channel.overlay.enabled && notValidNumber(scope.channel.overlay.verticalMargin, 0.00,100)) {
+                        scope.error.overlay = "Please include a valid overlay vertical margin.";
+                        scope.error.tab = "ffmpeg";
+                    } else if ( channel.overlay.enabled && notValidNumber(scope.channel.overlay.horizontalMargin, 0.00,100)) {
+                        scope.error.overlay = "Please include a valid overlay horizontal margin.";
+                        scope.error.tab = "ffmpeg";
+                    } else if ( channel.overlay.enabled && notValidNumber(scope.channel.overlay.labelAlpha, 0.00,100)) {
+                        scope.error.overlay = "Please include a valid overlay label opacity.";
+                        scope.error.tab = "ffmpeg";
+                    } else if ( channel.overlay.enabled && notValidNumber(scope.channel.overlay.textAlpha, 0.00,100)) {
+                        scope.error.overlay = "Please include a valid overlay text opacity.";
+                        scope.error.tab = "ffmpeg";
                     } else if (
                         channel.offlineMode != 'pic'
                         && (channel.fallback.length == 0)
@@ -1577,6 +1622,64 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
                     res["left"] = `${mH}%`;
                 } else {
                     console.log("huh? " + scope.channel.watermark.position );
+                }
+                return res;
+            }
+
+            scope.getUpNextOverlayPreviewInnerText = () => {
+                let height = element[0].querySelector("#up-next-overlay").clientHeight;
+                let res = {
+                    fontSize: `${scope.channel.overlay.textSize / 100 * height}px`,
+                    margin: "0",
+                    position: "absolute",
+                    opacity: scope.channel.overlay.textAlpha / 100,
+                    color: scope.channel.overlay.textColor,
+                }
+                let mH = scope.channel.overlay.horizontalMargin;
+                let mV = scope.channel.overlay.verticalMargin;
+                if (scope.channel.overlay.position == 'top-left') {
+                    res["top"] = `${mV + scope.channel.overlay.labelSize + scope.channel.overlay.lineSpacing}%`;
+                    res["left"] = `${mH}%`;
+                } else if (scope.channel.overlay.position == 'top-right') {
+                    res["top"] = `${mV + scope.channel.overlay.labelSize + scope.channel.overlay.lineSpacing}%`;
+                    res["right"] = `${mH}%`;
+                } else if (scope.channel.overlay.position == 'bottom-right') {
+                    res["bottom"] = `${mV + scope.channel.overlay.labelSize + scope.channel.overlay.lineSpacing}%`;
+                    res["right"] = `${mH}%`;
+                } else if (scope.channel.overlay.position == 'bottom-left') {
+                    res["bottom"] = `${mV + scope.channel.overlay.labelSize + scope.channel.overlay.lineSpacing}%`;
+                    res["left"] = `${mH}%`;
+                } else {
+                    console.log("huh? " + scope.channel.overlay.position );
+                }
+                return res;
+            }
+
+            scope.getUpNextOverlayPreviewInnerLabel = () => {
+                let height = element[0].querySelector("#up-next-overlay").clientHeight;
+                let res = {
+                    fontSize: `${scope.channel.overlay.labelSize / 100 * height}px`,
+                    margin: "0",
+                    position: "absolute",
+                    opacity: scope.channel.overlay.labelAlpha / 100,
+                    color: scope.channel.overlay.labelColor,
+                }
+                let mH = scope.channel.overlay.horizontalMargin;
+                let mV = scope.channel.overlay.verticalMargin;
+                if (scope.channel.overlay.position == 'top-left') {
+                    res["top"] = `${mV}%`;
+                    res["left"] = `${mH}%`;
+                } else if (scope.channel.overlay.position == 'top-right') {
+                    res["top"] = `${mV}%`;
+                    res["right"] = `${mH}%`;
+                } else if (scope.channel.overlay.position == 'bottom-right') {
+                    res["bottom"] = `${mV}%`;
+                    res["right"] = `${mH}%`;
+                } else if (scope.channel.overlay.position == 'bottom-left') {
+                    res["bottom"] = `${mV}%`;
+                    res["left"] = `${mH}%`;
+                } else {
+                    console.log("huh? " + scope.channel.overlay.position );
                 }
                 return res;
             }

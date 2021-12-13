@@ -167,6 +167,7 @@ function video( channelDB , fillerDB, db) {
 
         // Get video lineup (array of video urls with calculated start times and durations.)
       let lineupItem = channelCache.getCurrentLineupItem( channel.number, t0);
+      let nextProgram = null;
       let prog = null;
       let brandChannel = channel;
       let redirectChannels = [];
@@ -181,6 +182,7 @@ function video( channelDB , fillerDB, db) {
           };
       } else if (lineupItem == null) {
         prog = helperFuncs.getCurrentProgramAndTimeElapsed(t0, channel);
+        nextProgram = prog.nextProgram;
         
         while (true) {
             redirectChannels.push( brandChannel );
@@ -312,6 +314,7 @@ function video( channelDB , fillerDB, db) {
 
         let playerContext = {
             lineupItem : lineupItem,
+            nextProgram: nextProgram,
             ffmpegSettings : ffmpegSettings,
             channel: combinedChannel,
             db: db,

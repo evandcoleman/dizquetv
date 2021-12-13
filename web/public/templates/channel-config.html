@@ -805,6 +805,117 @@
                     </div>
 
                     <hr></hr>
+                    <h6>Up Next Overlay</h6>
+
+                    <div class='form-check'>
+                        <input class="form-check-input" type="checkbox" ng-model="channel.overlay.enabled" id="upNextOverlayCheck"></input>
+                        <label class="form-check-label" for="upNextOverlayCheck">
+                            Enable Overlay
+                        </label>
+                        <small class='text-muted form-ext' >Renders text on top of the channel&apos;s stream indicating the next up program during flex time.</small>
+                    </div>
+
+                    <div ng-show="channel.overlay.enabled" class='row' >
+
+                        <div class='col-md-3 col-lg-4 col-xl-5'>
+                            <h7>Preview</h7>
+                            <div id="up-next-overlay" ng-style='getWatermarkPreviewOuter()' class='watermark-preview'>
+                                <div ng-style='getWatermarkPreviewRectangle(4,3)' class='alternate-aspect' ></div>
+                                <div ng-style='getWatermarkPreviewRectangle(16,9)' class='alternate-aspect' ></div>
+                                <div ng-style='getUpNextOverlayPreviewInnerLabel()'>Up Next</div>
+                                <div ng-style='getUpNextOverlayPreviewInnerText()'>Next Program Title</div>
+                            </div>
+                        </div>
+
+                        <div class='col'>
+                            <small class='text-danger' ng-show='error.upNextOverlay'>{{ error.upNextOverlay }}</small>
+
+                            <div class="form-group">
+                                <label for="upNextOverlayPosition">Position:</label>
+                                <select class="form-control custom-select" id="upNextOverlayPosition" ng-model="channel.overlay.position">
+                                    <option value="top-left">Top Left</option>
+                                    <option value="top-right">Top Right</option>
+                                    <option value="bottom-left">Bottom Left</option>
+                                    <option value="bottom-right">Bottom Right</option>
+                                </select>
+                            </div>
+
+                            <div class='form-row'>
+                                <div class='form-group col-sm-auto'>
+                                    <label for="upNextOverlayHorizontal">
+                                        Horizontal Margin %:
+                                    </label>
+                                    <input id='upNextOverlayHorizontal' class='form-control' type='number' ng-model='channel.overlay.horizontalMargin' min="0" max="100" step="any">
+                                    </input>
+                                </div>
+                                <div class='form-group col-sm-auto'>
+                                    <label for="upNextOverlayVertical">
+                                        Vertical Margin %:
+                                    </label>
+                                    <input id='upNextOverlayVertical' class='form-control' type='number' ng-model='channel.overlay.verticalMargin' min="0" max="100"  step="any" >
+                                    </input>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class='form-group col-sm-auto'>
+                                    <label for="upNextOverlayTextSize">
+                                        Text Size %:
+                                    </label>
+                                    <input id='upNextOverlayTextSize' class='form-control' type='number' ng-model='channel.overlay.textSize' min="0" max="100"  step="any" >
+                                    </input>
+                                </div>
+                                <div class='form-group col-sm-auto'>
+                                    <label for="upNextOverlayLabelSize">
+                                        Label Size %:
+                                    </label>
+                                    <input id='upNextOverlayLabelSize' class='form-control' type='number' ng-model='channel.overlay.labelSize' min="0" max="100"  step="any" >
+                                    </input>
+                                </div>
+                                <div class='form-group col-sm-auto'>
+                                    <label for="upNextOverlayLineSpacing">
+                                        Line Spacing %:
+                                    </label>
+                                    <input id='upNextOverlayLineSpacing' class='form-control' type='number' ng-model='channel.overlay.lineSpacing' min="0" max="100"  step="any" >
+                                    </input>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class='form-group col-sm-auto'>
+                                    <label for="upNextOverlayTextAlpha">
+                                        Text Opacity %:
+                                    </label>
+                                    <input id='upNextOverlayTextAlpha' class='form-control' type='number' ng-model='channel.overlay.textAlpha' min="0" max="100"  step="any" >
+                                    </input>
+                                </div>
+                                <div class='form-group col-sm-auto'>
+                                    <label for="upNextOverlayLabelAlpha">
+                                        Label Opacity %:
+                                    </label>
+                                    <input id='upNextOverlayLabelAlpha' class='form-control' type='number' ng-model='channel.overlay.labelAlpha' min="0" max="100"  step="any" >
+                                    </input>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class='form-group col-sm-auto'>
+                                    <label for="upNextOverlayTextColor">
+                                        Text Color:
+                                    </label>
+                                    <input id='upNextOverlayTextColor' class='form-control' type='color' ng-model='channel.overlay.textColor' >
+                                    </input>
+                                </div>
+                                <div class='form-group col-sm-auto'>
+                                    <label for="upNextOverlayLabelColor">
+                                        Label Color:
+                                    </label>
+                                    <input id='upNextOverlayLabelColor' class='form-control' type='color' ng-model='channel.overlay.labelColor' >
+                                    </input>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <hr></hr>
                     <h6>Transcoding settings</h6>
 
 

@@ -2,6 +2,7 @@ module.exports = {
     getCurrentProgramAndTimeElapsed: getCurrentProgramAndTimeElapsed,
     createLineup: createLineup,
     getWatermark: getWatermark,
+    getOverlay: getOverlay,
     generateChannelContext: generateChannelContext,
 }
 
@@ -14,6 +15,7 @@ const random = new Random( randomJS.MersenneTwister19937.autoSeed() );
 const CHANNEL_CONTEXT_KEYS = [
     "disableFillerOverlay",
     "watermark",
+    "overlay",
     "icon",
     "offlinePicture",
     "offlineSoundtrack",
@@ -58,7 +60,12 @@ function getCurrentProgramAndTimeElapsed(date, channel) {
     if (currentProgramIndex === -1)
         throw new Error("No program found; find algorithm fucked up")
 
-    return { program: channel.programs[currentProgramIndex], timeElapsed: timeElapsed, programIndex: currentProgramIndex }
+    return {
+        program: channel.programs[currentProgramIndex],
+        nextProgram: channel.programs.slice(currentProgramIndex + 1).find((item) => !item.isOffline),
+        timeElapsed: timeElapsed,
+        programIndex: currentProgramIndex
+    }
 }
 
 function createLineup(obj, channel, fillers, isFirst) {
@@ -319,6 +326,31 @@ function getWatermark(  ffmpegSettings, channel, type) {
         animated: (watermark.animated === true),
     }
     return result;
+}
+
+function getOverlay(ffmpegSettings, channel, type, nextProgram) {
+    if (! ffmpegSettings.enableFFMPEGTranscoding ) {
+        return null;
+    }
+    
+    if (type === 'commercial' && nextProgram && channel.overlay) {
+        return {
+            text: nextProgram.showTitle || nextProgram.title,
+            label: 'Up Next',
+            verticalMargin: channel.overlay.verticalMargin,
+            horizontalMargin: channel.overlay.horizontalMargin,
+            position: channel.overlay.position,
+            lineSpacing: channel.overlay.lineSpacing,
+            textSize: channel.overlay.textSize,
+            labelSize: channel.overlay.labelSize,
+            textAlpha: channel.overlay.textAlpha,
+            labelAlpha: channel.overlay.labelAlpha,
+            textColor: channel.overlay.textColor,
+            labelColor: channel.overlay.labelColor,
+        };
+    }
+    
+    return null;
 }
 
 

@@ -68,10 +68,10 @@ class FFMPEG extends events.EventEmitter {
         this.audioOnly = audioOnly;
     }
     async spawnConcat(streamUrl) {
-        return await this.spawn(streamUrl, undefined, undefined, undefined, true, false, undefined, true)
+        return await this.spawn(streamUrl, undefined, undefined, undefined, true, false, null, undefined, true)
     }
-    async spawnStream(streamUrl, streamStats, startTime, duration, enableIcon, type) {
-        return await this.spawn(streamUrl, streamStats, startTime, duration, true, enableIcon, type, false);
+    async spawnStream(streamUrl, streamStats, startTime, duration, enableIcon, overlay, type) {
+        return await this.spawn(streamUrl, streamStats, startTime, duration, true, enableIcon, overlay, type, false);
     }
     async spawnError(title, subtitle, duration) {
         if (! this.opts.enableFFMPEGTranscoding || this.opts.errorScreen == 'kill') {
@@ -90,7 +90,7 @@ class FFMPEG extends events.EventEmitter {
             videoHeight : this.wantedH,
             duration : duration,
         };
-        return await this.spawn({ errorTitle: title , subtitle: subtitle }, streamStats, undefined, `${streamStats.duration}ms`, true, false, 'error', false)
+        return await this.spawn({ errorTitle: title , subtitle: subtitle }, streamStats, undefined, `${streamStats.duration}ms`, true, false, null, 'error', false)
     }
     async spawnOffline(duration) {
         if (! this.opts.enableFFMPEGTranscoding) {
@@ -104,9 +104,9 @@ class FFMPEG extends events.EventEmitter {
             videoHeight : this.wantedH,
             duration : duration,
         };
-        return await this.spawn( {errorTitle: 'offline'}, streamStats, undefined, `${duration}ms`, true, false, 'offline', false);
+        return await this.spawn( {errorTitle: 'offline'}, streamStats, undefined, `${duration}ms`, true, false, null, 'offline', false);
     }
-    async spawn(streamUrl, streamStats, startTime, duration, limitRead, watermark, type, isConcatPlaylist) {
+    async spawn(streamUrl, streamStats, startTime, duration, limitRead, watermark, overlay, type, isConcatPlaylist) {
 
         let ffmpegArgs = [
              `-threads`, isConcatPlaylist? 1 : this.opts.threads,
@@ -153,7 +153,8 @@ class FFMPEG extends events.EventEmitter {
             // When we have an individual stream, there is a pipeline of possible
             // filters to apply.
             //
-            var doOverlay = ( (typeof(watermark)==='undefined') || (watermark != null) );
+            var doWatermark = ( (typeof(watermark)==='undefined') || (watermark != null) );
+            var doOverlay = overlay != null;
             var iW =  streamStats.videoWidth;
             var iH =  streamStats.videoHeight;
 
@@ -187,7 +188,8 @@ class FFMPEG extends events.EventEmitter {
 
             // prepare input streams
             if  ( ( typeof(streamUrl.errorTitle) !== 'undefined') || (streamStats.audioOnly) ) {
-                doOverlay = false; //never show icon in the error screen
+                doWatermark = false; //never show icon in the error screen
+                doOverlay = false;
                 // for error stream, we have to generate the input as well
                 this.apad = false; //all of these generate audio correctly-aligned to video so there is no need for apad
                 this.audioChannelsSampleRate = true; //we'll need these
@@ -306,7 +308,7 @@ class FFMPEG extends events.EventEmitter {
               }
                 currentVideo = "[videox]";
             }
-            if (doOverlay) {
+            if (doWatermark) {
                 if (watermark.animated === true) {
                     ffmpegArgs.push('-ignore_loop', '0');
                 }
@@ -378,7 +380,7 @@ class FFMPEG extends events.EventEmitter {
             }
 
             // Channel watermark:
-            if (doOverlay && (this.audioOnly !== true) ) {
+            if (doWatermark && (this.audioOnly !== true) ) {
                 var pW =watermark.width;
                 var w = Math.round( pW * iW / 100.0 );
                 var mpHorz = watermark.horizontalMargin;
@@ -411,6 +413,52 @@ class FFMPEG extends events.EventEmitter {
                 }
                 videoComplex += `;${currentVideo}${waterVideo}overlay=${overlayShortest}${p}${icnDur}[comb]`
                 currentVideo = '[comb]';
+            }
+
+            // Overlay
+            if (doOverlay && (this.audioOnly !== true) ) {
+                var mpHorz = overlay.horizontalMargin;
+                var mpVert = overlay.verticalMargin;
+                var horz = `(${mpHorz}*w/100)`;
+                var vert = `(${mpVert}*h/100)`;
+                const lineSpacing = overlay.lineSpacing / 100 * iH;
+                const textSize = overlay.textSize / 100 * iH;
+                const labelSize = overlay.labelSize / 100 * iH;
+
+                var lines = [
+                    {
+                        text: overlay.label,
+                        size: labelSize,
+                        alpha: overlay.labelAlpha / 100,
+                        color: overlay.labelColor,
+                    },
+                    {
+                        text: overlay.text,
+                        size: textSize,
+                        alpha: overlay.textAlpha / 100,
+                        color: overlay.textColor,
+                    },
+                ];
+                for (let i = 0; i < lines.length; i += 1) {
+                    const { text, size, alpha, color } = lines[i];
+                    let posAry = {
+                        'top-left': `x=${horz}:y=${vert}`,
+                        'top-right': `x=w-text_w-${horz}:y=${vert}`,
+                        'bottom-left': `x=${horz}:y=h-text_h-${vert}`,
+                        'bottom-right':  `x=w-text_w-${horz}:y=h-text_h-${vert}`,
+                    }
+
+                    vert += `+${size}+${lineSpacing}`;
+                    vert = `(${vert})`;
+                    
+                    let p = posAry[overlay.position];
+                    if (typeof(p) === 'undefined') {
+                        throw Error("Invalid overlay position: " + overlay.position);
+                    }
+
+                    videoComplex += `;${currentVideo}drawtext=fontfile=${process.env.DATABASE}/font.ttf:alpha=${alpha}:fontsize=${size}:fontcolor=${color}:text='${text}':${p}[ovly${i}]`;
+                    currentVideo = `[ovly${i}]`;
+                }
             }
 
 
