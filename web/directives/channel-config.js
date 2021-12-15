@@ -157,6 +157,7 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
                     horizontalMargin: 0.00,
                     duration: 0,
                     alpha: 100,
+                    filters: null,
                 }
             }
 

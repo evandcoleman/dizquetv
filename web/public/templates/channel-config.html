@@ -810,6 +810,19 @@
                                 <input id='overlayDuration' class='form-control' type='number' ng-model='channel.watermark.duration' min=0>
                                 </input>
                             </div>
+
+                            <br>
+
+                            <div class='form-row'>
+                                <div class='form-group col-sm-auto'>
+                                    <label for="watermarkFilters" >
+                                        Other Image Filters:
+                                    </label>
+                                    <input id='watermarkFilters' class='form-control' type='text' ng-model='channel.watermark.filters' >
+                                    </input>
+                                    <small class='text-muted form-text' >Enter a comma separated string of additional ffmpeg filters to apply to the watermark image.</small>
+                                </div>
+                            </div>
                         </div>
 
                     </div>
