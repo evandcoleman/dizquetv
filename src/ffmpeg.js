@@ -487,7 +487,7 @@ class FFMPEG extends events.EventEmitter {
                     throw Error("Invalid overlay position: " + overlay.position);
                 }
 
-                videoComplex += `;${currentVideo}drawtext=text='%{eif\\:floor((${overlay.seconds}-t)/60)\\:d}\\:%{eif\\:${overlay.seconds}-t-(floor((${overlay.seconds}-t)/60)*60)\\:d\\:2}':fontfile=${process.env.DATABASE}/font.ttf:alpha=${textAlpha}:fontsize=${textSize}:fontcolor=${textColor}:${p}[cdwn]`;
+                videoComplex += `;${currentVideo}drawtext=text='%{eif\\\:floor((${overlay.seconds}-t)/60)\\\:d}\\:%{eif\\\:${overlay.seconds}-t-(floor((${overlay.seconds}-t)/60)*60)\\\:d\\\:2}':fontfile=${process.env.DATABASE}/font.ttf:alpha=${textAlpha}:fontsize=${textSize}:fontcolor=${textColor}:${p}[cdwn]`;
                 currentVideo = `[cdwn]`;
             }
 
