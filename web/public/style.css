@@ -345,12 +345,19 @@ div.programming-programs div.list-group-item {
 .tools-pane input.form-control {
   border-color: #999999;
 }
-.watermark-preview {
+.overlay-preview {
   background: linear-gradient(180deg, rgb(90, 90, 90) 0%, rgb(110, 110, 110) 35%, rgb(130, 130, 130) 100%, rgb(150, 150, 150) 100%);
   border: 2px solid black;
 }
-.watermark-preview .alternate-aspect {
+.overlay-preview .alternate-aspect {
   background : rgba(255,255,255, 0.1);
+}
+.overlay-preview-wrap {
+  width: 100%;
+  display: table-cell; vertical-align: middle;
+}
+.overlay-preview-container {
+  display: table; width:100%;
 }
 
 .dizque-toast {

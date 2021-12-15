@@ -68,10 +68,10 @@ class FFMPEG extends events.EventEmitter {
         this.audioOnly = audioOnly;
     }
     async spawnConcat(streamUrl) {
-        return await this.spawn(streamUrl, undefined, undefined, undefined, true, false, null, undefined, true)
+        return await this.spawn(streamUrl, undefined, undefined, undefined, true, false, null, null, undefined, true)
     }
-    async spawnStream(streamUrl, streamStats, startTime, duration, enableIcon, upNextOverlay, type) {
-        return await this.spawn(streamUrl, streamStats, startTime, duration, true, enableIcon, upNextOverlay, type, false);
+    async spawnStream(streamUrl, streamStats, startTime, duration, enableIcon, upNextOverlay, countdownOverlay, type) {
+        return await this.spawn(streamUrl, streamStats, startTime, duration, true, enableIcon, upNextOverlay, countdownOverlay, type, false);
     }
     async spawnError(title, subtitle, duration) {
         if (! this.opts.enableFFMPEGTranscoding || this.opts.errorScreen == 'kill') {
@@ -90,7 +90,7 @@ class FFMPEG extends events.EventEmitter {
             videoHeight : this.wantedH,
             duration : duration,
         };
-        return await this.spawn({ errorTitle: title , subtitle: subtitle }, streamStats, undefined, `${streamStats.duration}ms`, true, false, null, 'error', false)
+        return await this.spawn({ errorTitle: title , subtitle: subtitle }, streamStats, undefined, `${streamStats.duration}ms`, true, false, null, null, 'error', false)
     }
     async spawnOffline(duration) {
         if (! this.opts.enableFFMPEGTranscoding) {
@@ -104,9 +104,9 @@ class FFMPEG extends events.EventEmitter {
             videoHeight : this.wantedH,
             duration : duration,
         };
-        return await this.spawn( {errorTitle: 'offline'}, streamStats, undefined, `${duration}ms`, true, false, null, 'offline', false);
+        return await this.spawn( {errorTitle: 'offline'}, streamStats, undefined, `${duration}ms`, true, false, null, null, 'offline', false);
     }
-    async spawn(streamUrl, streamStats, startTime, duration, limitRead, watermark, upNextOverlay, type, isConcatPlaylist) {
+    async spawn(streamUrl, streamStats, startTime, duration, limitRead, watermark, upNextOverlay, countdownOverlay, type, isConcatPlaylist) {
 
         let ffmpegArgs = [
              `-threads`, isConcatPlaylist? 1 : this.opts.threads,
@@ -155,6 +155,7 @@ class FFMPEG extends events.EventEmitter {
             //
             var doWatermark = ( (typeof(watermark)==='undefined') || (watermark != null) );
             var doUpNextOverlay = upNextOverlay != null;
+            var doCountdownOverlay = countdownOverlay != null;
             var iW =  streamStats.videoWidth;
             var iH =  streamStats.videoHeight;
 
@@ -190,6 +191,7 @@ class FFMPEG extends events.EventEmitter {
             if  ( ( typeof(streamUrl.errorTitle) !== 'undefined') || (streamStats.audioOnly) ) {
                 doWatermark = false; //never show icon in the error screen
                 doUpNextOverlay = false;
+                doCountdownOverlay = false;
                 // for error stream, we have to generate the input as well
                 this.apad = false; //all of these generate audio correctly-aligned to video so there is no need for apad
                 this.audioChannelsSampleRate = true; //we'll need these
@@ -415,7 +417,7 @@ class FFMPEG extends events.EventEmitter {
                 currentVideo = '[comb]';
             }
 
-            // Overlay
+            // Up Next Overlay
             if (doUpNextOverlay && (this.audioOnly !== true) ) {
                 const overlay = upNextOverlay;
                 var mpHorz = overlay.horizontalMargin;
@@ -460,6 +462,33 @@ class FFMPEG extends events.EventEmitter {
                     videoComplex += `;${currentVideo}drawtext=fontfile=${process.env.DATABASE}/font.ttf:alpha=${alpha}:fontsize=${size}:fontcolor=${color}:text='${text}':${p}[ovly${i}]`;
                     currentVideo = `[ovly${i}]`;
                 }
+            }
+
+            // Countdown Overlay
+            if (doCountdownOverlay && (this.audioOnly !== true) ) {
+                const overlay = countdownOverlay;
+                var mpHorz = overlay.horizontalMargin;
+                var mpVert = overlay.verticalMargin;
+                var horz = `(${mpHorz}*w/100)`;
+                var vert = `(${mpVert}*h/100)`;
+                const textSize = overlay.textSize / 100 * iH;
+                const textAlpha = overlay.textAlpha / 100;
+                const textColor = overlay.textColor;
+
+                let posAry = {
+                    'top-left': `x=${horz}:y=${vert}`,
+                    'top-right': `x=w-text_w-${horz}:y=${vert}`,
+                    'bottom-left': `x=${horz}:y=h-text_h-${vert}`,
+                    'bottom-right':  `x=w-text_w-${horz}:y=h-text_h-${vert}`,
+                }
+                
+                let p = posAry[overlay.position];
+                if (typeof(p) === 'undefined') {
+                    throw Error("Invalid overlay position: " + overlay.position);
+                }
+
+                videoComplex += `;${currentVideo}drawtext=text='%{eif\\:floor((${overlay.seconds}-t)/60)\\:d}\\:%{eif\\:${overlay.seconds}-t-(floor((${overlay.seconds}-t)/60)*60)\\:d\\:2}':fontfile=${process.env.DATABASE}/font.ttf:alpha=${textAlpha}:fontsize=${textSize}:fontcolor=${textColor}:${p}[cdwn]`;
+                currentVideo = `[cdwn]`;
             }
 
 

@@ -62,6 +62,7 @@ class PlexPlayer {
             this.plexTranscoder = plexTranscoder;
             let watermark = this.context.watermark;
             let upNextOverlay = this.context.upNextOverlay;
+            let countdownOverlay = this.context.countdownOverlay;
             let ffmpeg = new FFMPEG(ffmpegSettings, channel);  // Set the transcoder options
             ffmpeg.setAudioOnly( this.context.audioOnly );
             this.ffmpeg = ffmpeg;
@@ -86,7 +87,7 @@ class PlexPlayer {
 
             let emitter = new EventEmitter();
             //setTimeout( () => {
-                let ff = await ffmpeg.spawnStream(stream.streamUrl, stream.streamStats, streamStart, streamDuration, watermark, upNextOverlay, lineupItem.type); // Spawn the ffmpeg process
+                let ff = await ffmpeg.spawnStream(stream.streamUrl, stream.streamStats, streamStart, streamDuration, watermark, upNextOverlay, countdownOverlay, lineupItem.type); // Spawn the ffmpeg process
                 ff.pipe(outStream,  {'end':false} );
             //}, 100);
             plexTranscoder.startUpdatingPlex();

@@ -3,6 +3,7 @@ module.exports = {
     createLineup: createLineup,
     getWatermark: getWatermark,
     getUpNextOverlay: getUpNextOverlay,
+    getCountdownOverlay: getCountdownOverlay,
     generateChannelContext: generateChannelContext,
 }
 
@@ -16,6 +17,7 @@ const CHANNEL_CONTEXT_KEYS = [
     "disableFillerOverlay",
     "watermark",
     "upNextOverlay",
+    "countdownOverlay",
     "icon",
     "offlinePicture",
     "offlineSoundtrack",
@@ -141,7 +143,8 @@ function createLineup(obj, channel, fillers, isFirst) {
                 duration: filler.duration,
                 fillerId: filler.fillerId,
                 beginningOffset: beginningOffset,
-                serverKey: filler.serverKey
+                serverKey: filler.serverKey,
+                remaining: remaining,
             });
             return lineup;
         }
@@ -347,6 +350,26 @@ function getUpNextOverlay(ffmpegSettings, channel, type, nextProgram) {
             labelAlpha: channel.upNextOverlay.labelAlpha,
             textColor: channel.upNextOverlay.textColor,
             labelColor: channel.upNextOverlay.labelColor,
+        };
+    }
+    
+    return null;
+}
+
+function getCountdownOverlay(ffmpegSettings, channel, remaining) {
+    if (! ffmpegSettings.enableFFMPEGTranscoding ) {
+        return null;
+    }
+    
+    if (remaining && channel.countdownOverlay) {
+        return {
+            seconds: remaining / 1000,
+            verticalMargin: channel.countdownOverlay.verticalMargin,
+            horizontalMargin: channel.countdownOverlay.horizontalMargin,
+            position: channel.countdownOverlay.position,
+            textSize: channel.countdownOverlay.textSize,
+            textAlpha: channel.countdownOverlay.textAlpha,
+            textColor: channel.countdownOverlay.textColor,
         };
     }
     

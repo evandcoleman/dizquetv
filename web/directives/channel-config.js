@@ -54,6 +54,7 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
                 scope.channel.programs = []
                 scope.channel.watermark = defaultWatermark();
                 scope.channel.upNextOverlay = defaultUpNextOverlay();
+                scope.channel.countdownOverlay = defaultCountdownOverlay();
                 scope.channel.fillerCollections = []
                 scope.channel.guideFlexPlaceholder = "";
                 scope.channel.fillerRepeatCooldown = 30 * 60 * 1000;
@@ -102,6 +103,13 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
                     || (scope.channel.upNextOverlay.enabled !== true)
                 ) {
                     scope.channel.upNextOverlay = defaultUpNextOverlay();
+                }
+
+                if (
+                    (typeof(scope.channel.countdownOverlay) === 'undefined')
+                    || (scope.channel.countdownOverlay.enabled !== true)
+                ) {
+                    scope.channel.countdownOverlay = defaultCountdownOverlay();
                 }
 
                 if (
@@ -180,6 +188,18 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
                     textAlpha: 80,
                     textColor: "#FFFFFF",
                     labelColor: "#FFFFFF",
+                }
+            }
+
+            function defaultCountdownOverlay() {
+                return {
+                    enabled: false,
+                    position: "top-left",
+                    verticalMargin: 2.00,
+                    horizontalMargin: 2.00,
+                    textSize: 3.5,
+                    textAlpha: 80,
+                    textColor: "#FFFFFF",
                 }
             }
 
@@ -1043,6 +1063,18 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
                     } else if ( channel.upNextOverlay.enabled && notValidNumber(scope.channel.upNextOverlay.textAlpha, 0.00,100)) {
                         scope.error.upNextOverlay = "Please include a valid overlay text opacity.";
                         scope.error.tab = "ffmpeg";
+                    } else if ( channel.countdownOverlay.enabled && notValidNumber(scope.channel.countdownOverlay.textSize, 0.01,100)) {
+                        scope.error.countdownOverlay = "Please include a valid countdown text size.";
+                        scope.error.tab = "ffmpeg";
+                    } else if ( channel.countdownOverlay.enabled && notValidNumber(scope.channel.countdownOverlay.verticalMargin, 0.00,100)) {
+                        scope.error.countdownOverlay = "Please include a valid countdown vertical margin.";
+                        scope.error.tab = "ffmpeg";
+                    } else if ( channel.countdownOverlay.enabled && notValidNumber(scope.channel.countdownOverlay.horizontalMargin, 0.00,100)) {
+                        scope.error.countdownOverlay = "Please include a valid countdown horizontal margin.";
+                        scope.error.tab = "ffmpeg";
+                    } else if ( channel.countdownOverlay.enabled && notValidNumber(scope.channel.countdownOverlay.textAlpha, 0.00,100)) {
+                        scope.error.countdownOverlay = "Please include a valid countdown text opacity.";
+                        scope.error.tab = "ffmpeg";
                     } else if (
                         channel.offlineMode != 'pic'
                         && (channel.fallback.length == 0)
@@ -1690,6 +1722,38 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
                     res["left"] = `${mH}%`;
                 } else {
                     console.log("huh? " + scope.channel.upNextOverlay.position );
+                }
+                return res;
+            }
+
+            scope.getCountdownOverlayPreviewInner = () => {
+                let height = element[0].querySelector("#overlay-preview").clientHeight;
+                let res = {
+                    fontSize: `${scope.channel.countdownOverlay.textSize / 100 * height}px`,
+                    margin: "0",
+                    position: "absolute",
+                    opacity: scope.channel.countdownOverlay.textAlpha / 100,
+                    color: scope.channel.countdownOverlay.textColor,
+                }
+                if (!scope.channel.countdownOverlay.enabled) {
+                    res["display"] = "none";
+                }
+                let mH = scope.channel.countdownOverlay.horizontalMargin;
+                let mV = scope.channel.countdownOverlay.verticalMargin;
+                if (scope.channel.countdownOverlay.position == 'top-left') {
+                    res["top"] = `${mV}%`;
+                    res["left"] = `${mH}%`;
+                } else if (scope.channel.countdownOverlay.position == 'top-right') {
+                    res["top"] = `${mV}%`;
+                    res["right"] = `${mH}%`;
+                } else if (scope.channel.countdownOverlay.position == 'bottom-right') {
+                    res["bottom"] = `${mV}%`;
+                    res["right"] = `${mH}%`;
+                } else if (scope.channel.countdownOverlay.position == 'bottom-left') {
+                    res["bottom"] = `${mV}%`;
+                    res["left"] = `${mH}%`;
+                } else {
+                    console.log("huh? " + scope.channel.countdownOverlay.position );
                 }
                 return res;
             }

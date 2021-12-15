@@ -53,6 +53,7 @@ class ProgramPlayer {
         }
         this.context.watermark = helperFuncs.getWatermark( context.ffmpegSettings, context.channel, context.lineupItem.type);
         this.context.upNextOverlay = helperFuncs.getUpNextOverlay( context.ffmpegSettings, context.channel, context.lineupItem.type, context.nextProgram);
+        this.context.countdownOverlay = helperFuncs.getCountdownOverlay( context.ffmpegSettings, context.channel, context.lineupItem.remaining);
     }
 
     cleanUp() {

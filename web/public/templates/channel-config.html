@@ -702,14 +702,17 @@
                     <h6>Overlays</h6>
 
                     <div class="row">
-                        <div class='col-md-3 col-lg-4 col-xl-5'>
-                            <h7>Preview</h7>
-                            <div id="overlay-preview" ng-style='getOverlayPreviewOuter()' class='watermark-preview'>
-                                <div ng-style='getOverlayPreviewRectangle(4,3)' class='alternate-aspect' ></div>
-                                <div ng-style='getOverlayPreviewRectangle(16,9)' class='alternate-aspect' ></div>
-                                <img src='{{ getWatermarkSrc() }}' ng-style='getWatermarkPreviewInner()'></img>
-                                <div ng-style='getUpNextOverlayPreviewInnerLabel()'>Up Next</div>
-                                <div ng-style='getUpNextOverlayPreviewInnerText()'>Next Program Title</div>
+                        <div class='col-md-3 col-lg-4 col-xl-5 overlay-preview-container'>
+                            <div class="overlay-preview-wrap">
+                                <h7>Preview</h7>
+                                <div id="overlay-preview" ng-style='getOverlayPreviewOuter()' class='overlay-preview'>
+                                    <div ng-style='getOverlayPreviewRectangle(4,3)' class='alternate-aspect' ></div>
+                                    <div ng-style='getOverlayPreviewRectangle(16,9)' class='alternate-aspect' ></div>
+                                    <img src='{{ getWatermarkSrc() }}' ng-style='getWatermarkPreviewInner()'></img>
+                                    <div ng-style='getUpNextOverlayPreviewInnerLabel()'>Up Next</div>
+                                    <div ng-style='getUpNextOverlayPreviewInnerText()'>Next Program Title</div>
+                                    <div ng-style='getCountdownOverlayPreviewInner()'>2:31</div>
+                                </div>
                             </div>
                         </div>
 
@@ -848,6 +851,7 @@
                                         </input>
                                     </div>
                                 </div>
+                                <br>
                                 <div class="form-row">
                                     <div class='form-group col-sm-auto'>
                                         <label for="upNextOverlayTextSize">
@@ -887,6 +891,7 @@
                                         </input>
                                     </div>
                                 </div>
+                                <br>
                                 <div class="form-row">
                                     <div class='form-group col-sm-auto'>
                                         <label for="upNextOverlayTextColor">
@@ -900,6 +905,78 @@
                                             Label Color:
                                         </label>
                                         <input id='upNextOverlayLabelColor' class='form-control' type='color' ng-model='channel.upNextOverlay.labelColor' >
+                                        </input>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr></hr>
+                            <h6>Flex Countdown</h6>
+
+                            <div class='form-check'>
+                                <input class="form-check-input" type="checkbox" ng-model="channel.countdownOverlay.enabled" id="countdownCheck"></input>
+                                <label class="form-check-label" for="countdownCheck">
+                                    Enable Flex Countdown Overlay
+                                </label>
+                                <small class='text-muted form-ext' >Renders a countdown on top of the channel&apos;s stream during flex time until the next program starts.</small>
+                            </div>
+
+                            <div ng-show="channel.countdownOverlay.enabled" class='row' >
+
+                                <small class='text-danger' ng-show='error.countdownOverlay'>{{ error.countdownOverlay }}</small>
+
+                                <div class="form-group">
+                                    <label for="countdownOverlayPosition">Position:</label>
+                                    <select class="form-control custom-select" id="countdownOverlayPosition" ng-model="channel.countdownOverlay.position">
+                                        <option value="top-left">Top Left</option>
+                                        <option value="top-right">Top Right</option>
+                                        <option value="bottom-left">Bottom Left</option>
+                                        <option value="bottom-right">Bottom Right</option>
+                                    </select>
+                                </div>
+
+                                <div class='form-row'>
+                                    <div class='form-group col-sm-auto'>
+                                        <label for="countdownOverlayHorizontal">
+                                            Horizontal Margin %:
+                                        </label>
+                                        <input id='countdownOverlayHorizontal' class='form-control' type='number' ng-model='channel.countdownOverlay.horizontalMargin' min="0" max="100" step="any">
+                                        </input>
+                                    </div>
+                                    <div class='form-group col-sm-auto'>
+                                        <label for="countdownOverlayVertical">
+                                            Vertical Margin %:
+                                        </label>
+                                        <input id='countdownOverlayVertical' class='form-control' type='number' ng-model='channel.countdownOverlay.verticalMargin' min="0" max="100"  step="any" >
+                                        </input>
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="form-row">
+                                    <div class='form-group col-sm-auto'>
+                                        <label for="countdownOverlayextSize">
+                                            Text Size %:
+                                        </label>
+                                        <input id='countdownOverlayTextSize' class='form-control' type='number' ng-model='channel.countdownOverlay.textSize' min="0" max="100"  step="any" >
+                                        </input>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class='form-group col-sm-auto'>
+                                        <label for="countdownOverlayTextAlpha">
+                                            Text Opacity %:
+                                        </label>
+                                        <input id='countdownOverlayTextAlpha' class='form-control' type='number' ng-model='channel.countdownOverlay.textAlpha' min="0" max="100"  step="any" >
+                                        </input>
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="form-row">
+                                    <div class='form-group col-sm-auto'>
+                                        <label for="countdownOverlayTextColor">
+                                            Text Color:
+                                        </label>
+                                        <input id='countdownOverlayTextColor' class='form-control' type='color' ng-model='channel.countdownOverlay.textColor' >
                                         </input>
                                     </div>
                                 </div>
