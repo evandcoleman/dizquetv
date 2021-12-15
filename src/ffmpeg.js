@@ -401,8 +401,15 @@ class FFMPEG extends events.EventEmitter {
                     icnDur = `:enable='between(t,0,${watermark.duration})'`
                 }
                 let waterVideo = `[${overlayFile}:v]`;
+                let otherFilters = '';
+                if (watermark.alpha !== null) {
+                    otherFilters += `format=argb,colorchannelmixer=aa=${watermark.alpha / 100},`;
+                }
+                if (watermark.filters !== null && watermark.filters !== '') {
+                    otherFilters += `${watermark.filters},`;
+                }
                 if ( ! watermark.fixedSize) {
-                    videoComplex += `;${waterVideo}scale=${w}:-1[icn]`;
+                    videoComplex += `;${waterVideo}${otherFilters}scale=${w}:-1[icn]`;
                     waterVideo = '[icn]';
                 }
                 let p = posAry[watermark.position];
