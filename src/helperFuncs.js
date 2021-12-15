@@ -338,7 +338,7 @@ function getUpNextOverlay(ffmpegSettings, channel, type, nextProgram) {
     
     if (type === 'commercial' && nextProgram && channel.upNextOverlay) {
         return {
-            text: nextProgram.showTitle || nextProgram.title,
+            text: (nextProgram.showTitle || nextProgram.title).replace(/'/g, "\\\'").replace(/"/g, "\\\""),
             label: 'Up Next',
             verticalMargin: channel.upNextOverlay.verticalMargin,
             horizontalMargin: channel.upNextOverlay.horizontalMargin,
