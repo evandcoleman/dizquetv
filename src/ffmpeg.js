@@ -70,8 +70,8 @@ class FFMPEG extends events.EventEmitter {
     async spawnConcat(streamUrl) {
         return await this.spawn(streamUrl, undefined, undefined, undefined, true, false, null, undefined, true)
     }
-    async spawnStream(streamUrl, streamStats, startTime, duration, enableIcon, overlay, type) {
-        return await this.spawn(streamUrl, streamStats, startTime, duration, true, enableIcon, overlay, type, false);
+    async spawnStream(streamUrl, streamStats, startTime, duration, enableIcon, upNextOverlay, type) {
+        return await this.spawn(streamUrl, streamStats, startTime, duration, true, enableIcon, upNextOverlay, type, false);
     }
     async spawnError(title, subtitle, duration) {
         if (! this.opts.enableFFMPEGTranscoding || this.opts.errorScreen == 'kill') {
@@ -106,7 +106,7 @@ class FFMPEG extends events.EventEmitter {
         };
         return await this.spawn( {errorTitle: 'offline'}, streamStats, undefined, `${duration}ms`, true, false, null, 'offline', false);
     }
-    async spawn(streamUrl, streamStats, startTime, duration, limitRead, watermark, overlay, type, isConcatPlaylist) {
+    async spawn(streamUrl, streamStats, startTime, duration, limitRead, watermark, upNextOverlay, type, isConcatPlaylist) {
 
         let ffmpegArgs = [
              `-threads`, isConcatPlaylist? 1 : this.opts.threads,
@@ -154,7 +154,7 @@ class FFMPEG extends events.EventEmitter {
             // filters to apply.
             //
             var doWatermark = ( (typeof(watermark)==='undefined') || (watermark != null) );
-            var doOverlay = overlay != null;
+            var doUpNextOverlay = upNextOverlay != null;
             var iW =  streamStats.videoWidth;
             var iH =  streamStats.videoHeight;
 
@@ -189,7 +189,7 @@ class FFMPEG extends events.EventEmitter {
             // prepare input streams
             if  ( ( typeof(streamUrl.errorTitle) !== 'undefined') || (streamStats.audioOnly) ) {
                 doWatermark = false; //never show icon in the error screen
-                doOverlay = false;
+                doUpNextOverlay = false;
                 // for error stream, we have to generate the input as well
                 this.apad = false; //all of these generate audio correctly-aligned to video so there is no need for apad
                 this.audioChannelsSampleRate = true; //we'll need these
@@ -416,7 +416,8 @@ class FFMPEG extends events.EventEmitter {
             }
 
             // Overlay
-            if (doOverlay && (this.audioOnly !== true) ) {
+            if (doUpNextOverlay && (this.audioOnly !== true) ) {
+                const overlay = upNextOverlay;
                 var mpHorz = overlay.horizontalMargin;
                 var mpVert = overlay.verticalMargin;
                 var horz = `(${mpHorz}*w/100)`;

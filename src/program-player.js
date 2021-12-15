@@ -52,7 +52,7 @@ class ProgramPlayer {
             this.delegate = new PlexPlayer(context);
         }
         this.context.watermark = helperFuncs.getWatermark( context.ffmpegSettings, context.channel, context.lineupItem.type);
-        this.context.overlay = helperFuncs.getOverlay( context.ffmpegSettings, context.channel, context.lineupItem.type, context.nextProgram);
+        this.context.upNextOverlay = helperFuncs.getUpNextOverlay( context.ffmpegSettings, context.channel, context.lineupItem.type, context.nextProgram);
     }
 
     cleanUp() {

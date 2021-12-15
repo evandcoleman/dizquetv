@@ -2,7 +2,7 @@ module.exports = {
     getCurrentProgramAndTimeElapsed: getCurrentProgramAndTimeElapsed,
     createLineup: createLineup,
     getWatermark: getWatermark,
-    getOverlay: getOverlay,
+    getUpNextOverlay: getUpNextOverlay,
     generateChannelContext: generateChannelContext,
 }
 
@@ -15,7 +15,7 @@ const random = new Random( randomJS.MersenneTwister19937.autoSeed() );
 const CHANNEL_CONTEXT_KEYS = [
     "disableFillerOverlay",
     "watermark",
-    "overlay",
+    "upNextOverlay",
     "icon",
     "offlinePicture",
     "offlineSoundtrack",
@@ -328,25 +328,25 @@ function getWatermark(  ffmpegSettings, channel, type) {
     return result;
 }
 
-function getOverlay(ffmpegSettings, channel, type, nextProgram) {
+function getUpNextOverlay(ffmpegSettings, channel, type, nextProgram) {
     if (! ffmpegSettings.enableFFMPEGTranscoding ) {
         return null;
     }
     
-    if (type === 'commercial' && nextProgram && channel.overlay) {
+    if (type === 'commercial' && nextProgram && channel.upNextOverlay) {
         return {
             text: nextProgram.showTitle || nextProgram.title,
             label: 'Up Next',
-            verticalMargin: channel.overlay.verticalMargin,
-            horizontalMargin: channel.overlay.horizontalMargin,
-            position: channel.overlay.position,
-            lineSpacing: channel.overlay.lineSpacing,
-            textSize: channel.overlay.textSize,
-            labelSize: channel.overlay.labelSize,
-            textAlpha: channel.overlay.textAlpha,
-            labelAlpha: channel.overlay.labelAlpha,
-            textColor: channel.overlay.textColor,
-            labelColor: channel.overlay.labelColor,
+            verticalMargin: channel.upNextOverlay.verticalMargin,
+            horizontalMargin: channel.upNextOverlay.horizontalMargin,
+            position: channel.upNextOverlay.position,
+            lineSpacing: channel.upNextOverlay.lineSpacing,
+            textSize: channel.upNextOverlay.textSize,
+            labelSize: channel.upNextOverlay.labelSize,
+            textAlpha: channel.upNextOverlay.textAlpha,
+            labelAlpha: channel.upNextOverlay.labelAlpha,
+            textColor: channel.upNextOverlay.textColor,
+            labelColor: channel.upNextOverlay.labelColor,
         };
     }
     

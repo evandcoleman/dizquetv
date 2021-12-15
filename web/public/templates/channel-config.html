@@ -699,220 +699,212 @@
                 <div class="modal-body" ng-if="tab == 'ffmpeg'">
                     <small class='text-info'>These features require ffmpeg transcoding to be enabled in FFmpeg settings</small>
                     <hr></hr>
-                    <h6>Channel Watermark</h6>
+                    <h6>Overlays</h6>
 
-                    <div class='form-check'>
-                        <input class="form-check-input" type="checkbox" ng-model="channel.watermark.enabled" id="overlayCheck"></input>
-                        <label class="form-check-label" for="overlayCheck">
-                            Enable Watermark
-                        </label>
-                        <small class='text-muted form-ext' >Renders a channel icon (also known as bug or Digital On-screen Graphic) on top of the channel&apos;s stream.</small>
-                    </div>
-
-                    <div ng-show="channel.watermark.enabled" class='row' >
-
+                    <div class="row">
                         <div class='col-md-3 col-lg-4 col-xl-5'>
                             <h7>Preview</h7>
-                            <div ng-style='getWatermarkPreviewOuter()' class='watermark-preview'>
-                                <div ng-style='getWatermarkPreviewRectangle(4,3)' class='alternate-aspect' ></div>
-                                <div ng-style='getWatermarkPreviewRectangle(16,9)' class='alternate-aspect' ></div>
+                            <div id="overlay-preview" ng-style='getOverlayPreviewOuter()' class='watermark-preview'>
+                                <div ng-style='getOverlayPreviewRectangle(4,3)' class='alternate-aspect' ></div>
+                                <div ng-style='getOverlayPreviewRectangle(16,9)' class='alternate-aspect' ></div>
                                 <img src='{{ getWatermarkSrc() }}' ng-style='getWatermarkPreviewInner()'></img>
-                            </div>
-                        </div>
-
-                        <div class='col'>
-                            <small class='text-danger' ng-show='error.watermark'>{{ error.watermark }}</small>
-
-                            <div class='form-group'>
-                                <label for="overlayURL">
-                                    Watermark Picture URL:
-                                </label>
-
-                                <input id='overlayURL' class='form-control' type='url' ng-model='channel.watermark.url' placeholder="Leave empty to use the channel&apos;s icon.">
-                                </input>
-                                <div class="input-group-append">
-                                    <input type="file"
-                                    accept="image/*"
-                                    class="form-control-file"
-                                    onchange="angular.element(this).scope().watermarkOnChange(event)"
-                                    name="logo"
-                                    id="logo">
-                                    </input>
-                                </div>
-
-                            </div>
-
-                            <div class="form-group">
-                                <label for="watermarkPosition">Position:</label>
-                                <select class="form-control custom-select" id="watermarkPosition" ng-model="channel.watermark.position">
-                                    <option value="top-left">Top Left</option>
-                                    <option value="top-right">Top Right</option>
-                                    <option value="bottom-left">Bottom Left</option>
-                                    <option value="bottom-right">Bottom Right</option>
-                                </select>
-                            </div>
-
-                            <div class='form-row'>
-                                <div class='form-group col-sm-auto'>
-                                    <label for="watermarkWidth" >
-                                        Width %:
-                                    </label>
-                                    <input id='watermarkWidth' class='form-control' type='number' ng-model='channel.watermark.width' min="0" max="100" step="any" ng-disabled='channel.watermark.fixedSize' >
-                                    </input>
-                                </div>
-                                <div class='form-group col-sm-auto'>
-                                    <label for="watermarkHorizontal">
-                                        Horizontal Margin %:
-                                    </label>
-                                    <input id='watermarkHorizontal' class='form-control' type='number' ng-model='channel.watermark.horizontalMargin' min="0" max="100" step="any">
-                                    </input>
-                                </div>
-                                <div class='form-group col-sm-auto'>
-                                    <label for="watermarkVertical">
-                                        Vertical Margin %:
-                                    </label>
-                                    <input id='watermarkVertical' class='form-control' type='number' ng-model='channel.watermark.verticalMargin' min="0" max="100"  step="any" >
-                                    </input>
-                                </div>
-                            </div>
-                            <br>
-                            <div class='form-check col-sm-auto'>
-                                <input class="form-check-input" type="checkbox" ng-model="channel.watermark.fixedSize" id="overlayFixed"></input>
-                                <label class="form-check-label" for="overlayFixed">
-                                    Disable Image Scaling
-                                </label>
-                                <small class='text-muted form-text' >The image will be rendered at its actual size without applying any scaling to it.</small>
-                            </div>
-                            <div class='form-check col-sm-auto'>
-                                <input class="form-check-input" type="checkbox" ng-model="channel.watermark.animated" id="overlayAnimated"></input>
-                                <label class="form-check-label" for="overlayAnimated">
-                                    Animated Image
-                                </label>
-                                <small class='text-muted form-text' >Tick this if and only if the watermark is an animated GIF or PNG. It will make it loop or not loop according to the image&apos;s configuration. If the image is not animated, there will be playback errors.</small>
-                            </div>
-
-                            <br>
-
-                            <div class='form-group'>
-                                <label for="overlayDuration">
-                                    Overlay Duration (seconds) (0 = permanent):
-                                </label>
-                                <input id='overlayDuration' class='form-control' type='number' ng-model='channel.watermark.duration' min=0>
-                                </input>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <hr></hr>
-                    <h6>Up Next Overlay</h6>
-
-                    <div class='form-check'>
-                        <input class="form-check-input" type="checkbox" ng-model="channel.overlay.enabled" id="upNextOverlayCheck"></input>
-                        <label class="form-check-label" for="upNextOverlayCheck">
-                            Enable Overlay
-                        </label>
-                        <small class='text-muted form-ext' >Renders text on top of the channel&apos;s stream indicating the next up program during flex time.</small>
-                    </div>
-
-                    <div ng-show="channel.overlay.enabled" class='row' >
-
-                        <div class='col-md-3 col-lg-4 col-xl-5'>
-                            <h7>Preview</h7>
-                            <div id="up-next-overlay" ng-style='getWatermarkPreviewOuter()' class='watermark-preview'>
-                                <div ng-style='getWatermarkPreviewRectangle(4,3)' class='alternate-aspect' ></div>
-                                <div ng-style='getWatermarkPreviewRectangle(16,9)' class='alternate-aspect' ></div>
                                 <div ng-style='getUpNextOverlayPreviewInnerLabel()'>Up Next</div>
                                 <div ng-style='getUpNextOverlayPreviewInnerText()'>Next Program Title</div>
                             </div>
                         </div>
 
                         <div class='col'>
-                            <small class='text-danger' ng-show='error.upNextOverlay'>{{ error.upNextOverlay }}</small>
+                            <h6>Channel Watermark</h6>
 
-                            <div class="form-group">
-                                <label for="upNextOverlayPosition">Position:</label>
-                                <select class="form-control custom-select" id="upNextOverlayPosition" ng-model="channel.overlay.position">
-                                    <option value="top-left">Top Left</option>
-                                    <option value="top-right">Top Right</option>
-                                    <option value="bottom-left">Bottom Left</option>
-                                    <option value="bottom-right">Bottom Right</option>
-                                </select>
+                            <div class='form-check'>
+                                <input class="form-check-input" type="checkbox" ng-model="channel.watermark.enabled" id="overlayCheck"></input>
+                                <label class="form-check-label" for="overlayCheck">
+                                    Enable Watermark
+                                </label>
+                                <small class='text-muted form-ext' >Renders a channel icon (also known as bug or Digital On-screen Graphic) on top of the channel&apos;s stream.</small>
                             </div>
 
-                            <div class='form-row'>
-                                <div class='form-group col-sm-auto'>
-                                    <label for="upNextOverlayHorizontal">
-                                        Horizontal Margin %:
+                            <div ng-show="channel.watermark.enabled" class='row' >
+                            
+                                <small class='text-danger' ng-show='error.watermark'>{{ error.watermark }}</small>
+
+                                <div class='form-group'>
+                                    <label for="overlayURL">
+                                        Watermark Picture URL:
                                     </label>
-                                    <input id='upNextOverlayHorizontal' class='form-control' type='number' ng-model='channel.overlay.horizontalMargin' min="0" max="100" step="any">
+
+                                    <input id='overlayURL' class='form-control' type='url' ng-model='channel.watermark.url' placeholder="Leave empty to use the channel&apos;s icon.">
                                     </input>
+                                    <div class="input-group-append">
+                                        <input type="file"
+                                        accept="image/*"
+                                        class="form-control-file"
+                                        onchange="angular.element(this).scope().watermarkOnChange(event)"
+                                        name="logo"
+                                        id="logo">
+                                        </input>
+                                    </div>
+
                                 </div>
-                                <div class='form-group col-sm-auto'>
-                                    <label for="upNextOverlayVertical">
-                                        Vertical Margin %:
+
+                                <div class="form-group">
+                                    <label for="watermarkPosition">Position:</label>
+                                    <select class="form-control custom-select" id="watermarkPosition" ng-model="channel.watermark.position">
+                                        <option value="top-left">Top Left</option>
+                                        <option value="top-right">Top Right</option>
+                                        <option value="bottom-left">Bottom Left</option>
+                                        <option value="bottom-right">Bottom Right</option>
+                                    </select>
+                                </div>
+
+                                <div class='form-row'>
+                                    <div class='form-group col-sm-auto'>
+                                        <label for="watermarkWidth" >
+                                            Width %:
+                                        </label>
+                                        <input id='watermarkWidth' class='form-control' type='number' ng-model='channel.watermark.width' min="0" max="100" step="any" ng-disabled='channel.watermark.fixedSize' >
+                                        </input>
+                                    </div>
+                                    <div class='form-group col-sm-auto'>
+                                        <label for="watermarkHorizontal">
+                                            Horizontal Margin %:
+                                        </label>
+                                        <input id='watermarkHorizontal' class='form-control' type='number' ng-model='channel.watermark.horizontalMargin' min="0" max="100" step="any">
+                                        </input>
+                                    </div>
+                                    <div class='form-group col-sm-auto'>
+                                        <label for="watermarkVertical">
+                                            Vertical Margin %:
+                                        </label>
+                                        <input id='watermarkVertical' class='form-control' type='number' ng-model='channel.watermark.verticalMargin' min="0" max="100"  step="any" >
+                                        </input>
+                                    </div>
+                                </div>
+                                <br>
+                                <div class='form-check col-sm-auto'>
+                                    <input class="form-check-input" type="checkbox" ng-model="channel.watermark.fixedSize" id="overlayFixed"></input>
+                                    <label class="form-check-label" for="overlayFixed">
+                                        Disable Image Scaling
                                     </label>
-                                    <input id='upNextOverlayVertical' class='form-control' type='number' ng-model='channel.overlay.verticalMargin' min="0" max="100"  step="any" >
+                                    <small class='text-muted form-text' >The image will be rendered at its actual size without applying any scaling to it.</small>
+                                </div>
+                                <div class='form-check col-sm-auto'>
+                                    <input class="form-check-input" type="checkbox" ng-model="channel.watermark.animated" id="overlayAnimated"></input>
+                                    <label class="form-check-label" for="overlayAnimated">
+                                        Animated Image
+                                    </label>
+                                    <small class='text-muted form-text' >Tick this if and only if the watermark is an animated GIF or PNG. It will make it loop or not loop according to the image&apos;s configuration. If the image is not animated, there will be playback errors.</small>
+                                </div>
+
+                                <br>
+
+                                <div class='form-group'>
+                                    <label for="overlayDuration">
+                                        Overlay Duration (seconds) (0 = permanent):
+                                    </label>
+                                    <input id='overlayDuration' class='form-control' type='number' ng-model='channel.watermark.duration' min=0>
                                     </input>
                                 </div>
                             </div>
-                            <div class="form-row">
-                                <div class='form-group col-sm-auto'>
-                                    <label for="upNextOverlayTextSize">
-                                        Text Size %:
-                                    </label>
-                                    <input id='upNextOverlayTextSize' class='form-control' type='number' ng-model='channel.overlay.textSize' min="0" max="100"  step="any" >
-                                    </input>
-                                </div>
-                                <div class='form-group col-sm-auto'>
-                                    <label for="upNextOverlayLabelSize">
-                                        Label Size %:
-                                    </label>
-                                    <input id='upNextOverlayLabelSize' class='form-control' type='number' ng-model='channel.overlay.labelSize' min="0" max="100"  step="any" >
-                                    </input>
-                                </div>
-                                <div class='form-group col-sm-auto'>
-                                    <label for="upNextOverlayLineSpacing">
-                                        Line Spacing %:
-                                    </label>
-                                    <input id='upNextOverlayLineSpacing' class='form-control' type='number' ng-model='channel.overlay.lineSpacing' min="0" max="100"  step="any" >
-                                    </input>
-                                </div>
+
+                            <hr></hr>
+                            <h6>Up Next Overlay</h6>
+
+                            <div class='form-check'>
+                                <input class="form-check-input" type="checkbox" ng-model="channel.upNextOverlay.enabled" id="upNextOverlayCheck"></input>
+                                <label class="form-check-label" for="upNextOverlayCheck">
+                                    Enable Overlay
+                                </label>
+                                <small class='text-muted form-ext' >Renders text on top of the channel&apos;s stream indicating the next up program during flex time.</small>
                             </div>
-                            <div class="form-row">
-                                <div class='form-group col-sm-auto'>
-                                    <label for="upNextOverlayTextAlpha">
-                                        Text Opacity %:
-                                    </label>
-                                    <input id='upNextOverlayTextAlpha' class='form-control' type='number' ng-model='channel.overlay.textAlpha' min="0" max="100"  step="any" >
-                                    </input>
+
+                            <div ng-show="channel.upNextOverlay.enabled" class='row' >
+
+                                <small class='text-danger' ng-show='error.upNextOverlay'>{{ error.upNextOverlay }}</small>
+
+                                <div class="form-group">
+                                    <label for="upNextOverlayPosition">Position:</label>
+                                    <select class="form-control custom-select" id="upNextOverlayPosition" ng-model="channel.upNextOverlay.position">
+                                        <option value="top-left">Top Left</option>
+                                        <option value="top-right">Top Right</option>
+                                        <option value="bottom-left">Bottom Left</option>
+                                        <option value="bottom-right">Bottom Right</option>
+                                    </select>
                                 </div>
-                                <div class='form-group col-sm-auto'>
-                                    <label for="upNextOverlayLabelAlpha">
-                                        Label Opacity %:
-                                    </label>
-                                    <input id='upNextOverlayLabelAlpha' class='form-control' type='number' ng-model='channel.overlay.labelAlpha' min="0" max="100"  step="any" >
-                                    </input>
+
+                                <div class='form-row'>
+                                    <div class='form-group col-sm-auto'>
+                                        <label for="upNextOverlayHorizontal">
+                                            Horizontal Margin %:
+                                        </label>
+                                        <input id='upNextOverlayHorizontal' class='form-control' type='number' ng-model='channel.upNextOverlay.horizontalMargin' min="0" max="100" step="any">
+                                        </input>
+                                    </div>
+                                    <div class='form-group col-sm-auto'>
+                                        <label for="upNextOverlayVertical">
+                                            Vertical Margin %:
+                                        </label>
+                                        <input id='upNextOverlayVertical' class='form-control' type='number' ng-model='channel.upNextOverlay.verticalMargin' min="0" max="100"  step="any" >
+                                        </input>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="form-row">
-                                <div class='form-group col-sm-auto'>
-                                    <label for="upNextOverlayTextColor">
-                                        Text Color:
-                                    </label>
-                                    <input id='upNextOverlayTextColor' class='form-control' type='color' ng-model='channel.overlay.textColor' >
-                                    </input>
+                                <div class="form-row">
+                                    <div class='form-group col-sm-auto'>
+                                        <label for="upNextOverlayTextSize">
+                                            Text Size %:
+                                        </label>
+                                        <input id='upNextOverlayTextSize' class='form-control' type='number' ng-model='channel.upNextOverlay.textSize' min="0" max="100"  step="any" >
+                                        </input>
+                                    </div>
+                                    <div class='form-group col-sm-auto'>
+                                        <label for="upNextOverlayLabelSize">
+                                            Label Size %:
+                                        </label>
+                                        <input id='upNextOverlayLabelSize' class='form-control' type='number' ng-model='channel.upNextOverlay.labelSize' min="0" max="100"  step="any" >
+                                        </input>
+                                    </div>
+                                    <div class='form-group col-sm-auto'>
+                                        <label for="upNextOverlayLineSpacing">
+                                            Line Spacing %:
+                                        </label>
+                                        <input id='upNextOverlayLineSpacing' class='form-control' type='number' ng-model='channel.upNextOverlay.lineSpacing' min="0" max="100"  step="any" >
+                                        </input>
+                                    </div>
                                 </div>
-                                <div class='form-group col-sm-auto'>
-                                    <label for="upNextOverlayLabelColor">
-                                        Label Color:
-                                    </label>
-                                    <input id='upNextOverlayLabelColor' class='form-control' type='color' ng-model='channel.overlay.labelColor' >
-                                    </input>
+                                <div class="form-row">
+                                    <div class='form-group col-sm-auto'>
+                                        <label for="upNextOverlayTextAlpha">
+                                            Text Opacity %:
+                                        </label>
+                                        <input id='upNextOverlayTextAlpha' class='form-control' type='number' ng-model='channel.upNextOverlay.textAlpha' min="0" max="100"  step="any" >
+                                        </input>
+                                    </div>
+                                    <div class='form-group col-sm-auto'>
+                                        <label for="upNextOverlayLabelAlpha">
+                                            Label Opacity %:
+                                        </label>
+                                        <input id='upNextOverlayLabelAlpha' class='form-control' type='number' ng-model='channel.upNextOverlay.labelAlpha' min="0" max="100"  step="any" >
+                                        </input>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class='form-group col-sm-auto'>
+                                        <label for="upNextOverlayTextColor">
+                                            Text Color:
+                                        </label>
+                                        <input id='upNextOverlayTextColor' class='form-control' type='color' ng-model='channel.upNextOverlay.textColor' >
+                                        </input>
+                                    </div>
+                                    <div class='form-group col-sm-auto'>
+                                        <label for="upNextOverlayLabelColor">
+                                            Label Color:
+                                        </label>
+                                        <input id='upNextOverlayLabelColor' class='form-control' type='color' ng-model='channel.upNextOverlay.labelColor' >
+                                        </input>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
                     </div>
 
                     <hr></hr>
