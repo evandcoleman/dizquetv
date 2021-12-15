@@ -363,7 +363,7 @@ function getCountdownOverlay(ffmpegSettings, channel, remaining) {
     
     if (remaining && channel.countdownOverlay) {
         return {
-            seconds: remaining / 1000,
+            seconds: Math.floor(remaining / 1000),
             verticalMargin: channel.countdownOverlay.verticalMargin,
             horizontalMargin: channel.countdownOverlay.horizontalMargin,
             position: channel.countdownOverlay.position,
