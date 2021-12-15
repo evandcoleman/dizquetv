@@ -317,6 +317,7 @@ function getWatermark(  ffmpegSettings, channel, type) {
         position: watermark.position,
         fixedSize: (watermark.fixedSize === true),
         animated: (watermark.animated === true),
+        alpha: watermark.alpha || 100,
     }
     return result;
 }

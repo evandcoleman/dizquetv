@@ -398,7 +398,7 @@ class FFMPEG extends events.EventEmitter {
                 }
                 let waterVideo = `[${overlayFile}:v]`;
                 if ( ! watermark.fixedSize) {
-                    videoComplex += `;${waterVideo}scale=${w}:-1[icn]`;
+                    videoComplex += `;${waterVideo}format=argb,colorchannelmixer=aa=${watermark.alpha / 100},scale=${w}:-1[icn]`;
                     waterVideo = '[icn]';
                 }
                 let p = posAry[watermark.position];

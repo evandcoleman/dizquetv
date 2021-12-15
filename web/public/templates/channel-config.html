@@ -776,6 +776,16 @@
                                 </div>
                             </div>
                             <br>
+                            <div class='form-row'>
+                                <div class='form-group col-sm-auto'>
+                                    <label for="watermarkAlpha" >
+                                        Image Opacity %:
+                                    </label>
+                                    <input id='watermarkAlpha' class='form-control' type='number' ng-model='channel.watermark.alpha' min="0" max="100" step="any" >
+                                    </input>
+                                </div>
+                            </div>
+                            <br>
                             <div class='form-check col-sm-auto'>
                                 <input class="form-check-input" type="checkbox" ng-model="channel.watermark.fixedSize" id="overlayFixed"></input>
                                 <label class="form-check-label" for="overlayFixed">

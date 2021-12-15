@@ -156,6 +156,7 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
                     verticalMargin: 0.00,
                     horizontalMargin: 0.00,
                     duration: 0,
+                    alpha: 100,
                 }
             }
 
@@ -992,6 +993,9 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
                     } else if ( channel.watermark.enabled && notValidNumber(scope.channel.watermark.horizontalMargin, 0.00,100)) {
                         scope.error.watermark = "Please include a valid watermark horizontal margin.";
                         scope.error.tab = "ffmpeg";
+                    } else if ( channel.watermark.enabled && notValidNumber(scope.channel.watermark.alpha, 0.00,100)) {
+                        scope.error.watermark = "Please include a valid watermark opacity.";
+                        scope.error.tab = "ffmpeg";
                     } else if ( channel.watermark.enabled && (scope.channel.watermark.width + scope.channel.watermark.horizontalMargin > 100.0) ) {
                         scope.error.watermark = "Horizontal margin + width should not exceed 100.";
                         scope.error.tab = "ffmpeg";
@@ -1557,6 +1561,7 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
                     width: `${width}%`,
                     margin: "0",
                     position: "absolute",
+                    opacity: scope.channel.watermark.alpha / 100,
                 }
                 if (scope.channel.watermark.fixedSize === true) {
                     delete res.width;
