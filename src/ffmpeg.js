@@ -405,7 +405,7 @@ class FFMPEG extends events.EventEmitter {
                 if (watermark.alpha !== null) {
                     otherFilters += `format=argb,colorchannelmixer=aa=${watermark.alpha / 100},`;
                 }
-                if (watermark.filters !== null && watermark.filters !== '') {
+                if (watermark.filters !== null && watermark.filters !== '' && watermark.filters !== undefined) {
                     otherFilters += `${watermark.filters},`;
                 }
                 if ( ! watermark.fixedSize) {
