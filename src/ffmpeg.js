@@ -400,7 +400,14 @@ class FFMPEG extends events.EventEmitter {
                 if (watermark.duration > 0) {
                     icnDur = `:enable='between(t,0,${watermark.duration})'`
                 }
-                let waterVideo = `[${overlayFile}:v]`;
+                let waterVideo = `[${overlayFile}:v]${otherFilters}`;
+                let otherFilters = '';
+                if (watermark.alpha !== null) {
+                    otherFilters += `format=argb,colorchannelmixer=aa=${watermark.alpha / 100},`;
+                }
+                if (watermark.filters !== null && watermark.filters !== '' && watermark.filters !== undefined) {
+                    otherFilters += `${watermark.filters},`;
+                }
                 if ( ! watermark.fixedSize) {
                     videoComplex += `;${waterVideo}scale=${w}:-1[icn]`;
                     waterVideo = '[icn]';
