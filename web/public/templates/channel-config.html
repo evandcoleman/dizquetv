@@ -662,6 +662,42 @@
                             <p class="text-center text-info">Videos from the filler list will be randomly picked to play unless there are cooldown restrictions to place or if no videos are short enough for the remaining Flex time. Use the Filler tab at the main page to create Filler Lists. If no videos are available, the fallback will be used instead.</p>
 
                         </div>
+                        <hr></hr>
+                        <h6>Preroll Lists</h6>
+                        <div id='prerollContainer'>
+                            <br></br>
+    
+                            <div class="form-row" ng-repeat = "x in channel.prerollCollections" track-by = "$index">
+                                <div class='form-group col-md-5'>
+                                    <label ng-if="$index==0" for="prerollselect{{$index}}">List</label>
+                                    <select
+                                        id="prerollselect{{$index}}" class="custom-select form-control"
+                                        ng-model="x.fillerId" ng-options="o.fillerId as o.name for o in x.options"
+                                        ng-change="refreshPrerollStuff()"
+                                        >
+                                    </select>
+                                </div>
+                                <div class='form-group col-md-5' ng-if="x.fillerId !== &apos;none&apos; &amp;&amp; channel.prerollCollections.length &gt; 1">
+                                    <label ng-if="$index==0" for="prerollforselect{{$index}}">Play Before</label>
+                                    <select
+                                        id="prerollforselect{{$index}}" class="custom-select form-control"
+                                        ng-model="x.showId" ng-options="o.showId as o.showDisplayName for o in x.shows"
+                                        ng-change="refreshPrerollStuff()"
+                                        >
+                                    </select>
+                                </div>
+                                <div class='form-group col-md-1' ng-if="x.fillerId !== &apos;none&apos;" >
+                                    <label ng-if="$index==0" for="deletePreroll{{$index}}">-</label>
+                                    <button id='deletePreroll{{$index}}' class='btn btn-link form-control' ng-click='deletePrerollList($index)' >
+                                        <i class='text-danger fa fa-trash-alt'></i>
+                                    </button>
+                                </div>
+        
+                            </div>
+                            <hr></hr >
+                            <p class="text-center text-info">Videos from the preroll list will be randomly picked to play before the selected show. Use the Filler tab at the main page to create Filler Lists. If no videos are available, the filler lists will be used instead.</p>
+
+                        </div>
                         
                     </div>
 

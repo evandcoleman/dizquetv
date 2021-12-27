@@ -55,7 +55,8 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
                 scope.channel.watermark = defaultWatermark();
                 scope.channel.upNextOverlay = defaultUpNextOverlay();
                 scope.channel.countdownOverlay = defaultCountdownOverlay();
-                scope.channel.fillerCollections = []
+                scope.channel.fillerCollections = [];
+                scope.channel.prerollCollections = [];
                 scope.channel.guideFlexPlaceholder = "";
                 scope.channel.fillerRepeatCooldown = 30 * 60 * 1000;
                 scope.channel.fallback = [];
@@ -129,6 +130,9 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
                 }
                 if (typeof(scope.channel.fillerCollections)==='undefined') {
                     scope.channel.fillerCollections = [];
+                }
+                if (typeof(scope.channel.prerollCollections)==='undefined') {
+                    scope.channel.prerollCollections = [];
                 }
                 if (typeof(scope.channel.fallback)==='undefined') {
                     scope.channel.fallback = [];
@@ -1339,6 +1343,13 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
                 }
             });
 
+            scope.prerollOptions = scope.channel.prerollCollections.map( (f) => {
+                return {
+                    fillerId: f.fillerId,
+                    name: `(${f.fillerId})`,
+                }
+            });
+
             scope.slide = {
                 value: -1,
                 options: [
@@ -1411,6 +1422,75 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
                 return options;
             }
 
+            let prerollOptionsFor = (index) => {
+                let usedFillerLists = {};
+                let addedFillerLists = {};
+                for (let i = 0; i < scope.channel.prerollCollections.length; i++) {
+                    if (scope.channel.prerollCollections[i].fillerId != 'none' && i != index) {
+                        usedFillerLists[scope.channel.prerollCollections[i].fillerId ] = true;
+                    }
+                }
+                let options = [];
+                for (let i = 0; i < scope.prerollOptions.length; i++) {
+                    if ( usedFillerLists[scope.prerollOptions[i].fillerId] !== true) {
+                        addedFillerLists[scope.prerollOptions[i].fillerId] = true;
+                        options.push( scope.prerollOptions[i] );
+                    }
+                }
+                if (scope.channel.prerollCollections[index].fillerId == 'none') {
+                    addedFillerLists['none'] = true;
+                    options.push( {
+                        fillerId: 'none',
+                        name: 'Add a filler list...',
+                    } );
+                }
+                if ( addedFillerLists[scope.channel.prerollCollections[index].fillerId] !== true ) {
+                    let option = scope.channel.prerollCollections[index].options?.find((x) => x.fillerId == scope.channel.prerollCollections[index].fillerId);
+                    if (option) {
+                        options.push( {
+                            fillerId: scope.channel.prerollCollections[index].fillerId,
+                            name: `[${option.name}]`,
+                        } );
+                    }
+                }
+
+                let usedShows = {};
+                let addedShows = {};
+                for (let i = 0; i < scope.channel.prerollCollections.length; i++) {
+                    if (scope.channel.prerollCollections[i].showId != 'none' && i != index) {
+                        usedShows[scope.channel.prerollCollections[i].showId] = true;
+                    }
+                }
+                let shows = [];
+                scope.channel.programs
+                    .map( getShowData )
+                    .filter( data => data.hasShow )
+                    .forEach( x => {
+                        if ( usedShows[x.showId] !== true) {
+                            addedShows[x.showId] = true;
+                            shows.push( x );
+                        }
+                    } );
+
+                if (scope.channel.prerollCollections[index].showId == 'none') {
+                    addedShows['none'] = true;
+                }
+                if (addedShows[scope.channel.prerollCollections[index].showId] !== true) {
+                    let show = scope.channel.prerollCollections[index].shows?.find((x) => x.showId == scope.channel.prerollCollections[index].showId);
+                    if (show) {
+                        shows.push({
+                            showId: scope.channel.prerollCollections[index].showId,
+                            name: `[${show.showDisplayName}]`,
+                        });
+                    }
+                }
+
+                return {
+                    fillers: options,
+                    shows: shows,
+                };
+            }
+
             scope.programmingHeight = () => {
                 return scope.programming.maxHeight + "rem";
             }
@@ -1442,6 +1522,15 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
                 refreshIndividualOptions();
             }
 
+            scope.refreshPrerollStuff = () => {
+                if (typeof(scope.channel.prerollCollections) === 'undefined') {
+                    return;
+                }
+                addAddPreroll();
+                refreshIndividualOptions();
+                console.log(scope.channel.prerollCollections);
+            }
+
             let updatePercentages = () => {
                 let w = 0;
                 for (let i = 0; i < scope.channel.fillerCollections.length; i++) {
@@ -1468,10 +1557,24 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
                 }
             }
 
+            let addAddPreroll = () => {
+                if ( (scope.channel.prerollCollections.length == 0) || (scope.channel.prerollCollections[scope.channel.prerollCollections.length-1].fillerId !== 'none') ) {
+                    scope.channel.prerollCollections.push ( {
+                        'fillerId': 'none',
+                        'showId': 'none',
+                    } );
+                }
+            }
+
 
             let refreshIndividualOptions = () => {
                 for (let i = 0; i < scope.channel.fillerCollections.length; i++) {
                     scope.channel.fillerCollections[i].options = fillerOptionsFor(i);
+                }
+                for (let i = 0; i < scope.channel.prerollCollections.length; i++) {
+                    const { fillers, shows } = prerollOptionsFor(i);
+                    scope.channel.prerollCollections[i].options = fillers;
+                    scope.channel.prerollCollections[i].shows = shows;
                 }
             }
 
@@ -1491,8 +1594,26 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
                     console.error("Unable to get filler info", err);
                 }
             };
+            let refreshPrerollOptions = async() => {
+
+                try {
+                    let r = await dizquetv.getAllFillersInfo();
+                    scope.prerollOptions = r.map((f) => {
+                        return {
+                            fillerId: f.id,
+                            name: f.name,
+                        };
+                    });
+                    scope.refreshPrerollStuff();
+                    scope.$apply();
+                } catch(err) {
+                    console.error("Unable to get preroll filler info", err);
+                }
+            };
             scope.refreshFillerStuff();
+            scope.refreshPrerollStuff();
             refreshFillerOptions();
+            refreshPrerollOptions();
 
             function parseResolutionString(s) {
                 var i = s.indexOf('x');
@@ -1548,6 +1669,11 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
             scope.deleteFillerList =(index) => {
                 scope.channel.fillerCollections.splice(index, 1);
                 scope.refreshFillerStuff();
+            }
+
+            scope.deletePrerollList =(index) => {
+                scope.channel.prerollCollections.splice(index, 1);
+                scope.refreshPrerollStuff();
             }
 
 

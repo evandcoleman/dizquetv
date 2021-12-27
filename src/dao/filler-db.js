@@ -188,6 +188,29 @@ class FillerDB {
         );
     }
 
+    async getPrerollsFromChannel(channel) {
+        let f = [];
+        if (typeof(channel.prerollCollections) !== 'undefined') {
+            f = channel.prerollContent;
+        }
+        let loadChannelPreroll = async(fillerEntry) => {
+            let content = [];
+            try {
+                let filler = await this.getFiller(fillerEntry.fillerId);
+                content = filler.content;
+            } catch(e) {
+                console.error(`Channel #${channel.number} - ${channel.name} references an unattainable preroll filler id: ${fillerEntry.fillerId}`);
+            }
+            return {
+                id: fillerEntry.fillerId,
+                content: content,
+                showId: fillerEntry.showId,
+            }
+        };
+        return await Promise.all(
+            channel.prerollCollections.filter((x) => x.showId != 'none' && x.fillerId != 'none').map(loadChannelPreroll)
+        );
+    }
 
 }
 

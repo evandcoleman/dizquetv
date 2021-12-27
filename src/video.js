@@ -257,7 +257,8 @@ function video( channelDB , fillerDB, db) {
             throw "No video to play, this means there's a serious unexpected bug or the channel db is corrupted."
         }
         let fillers = await fillerDB.getFillersFromChannel(brandChannel);
-        let lineup = helperFuncs.createLineup(prog, brandChannel, fillers, isFirst)
+        let prerolls = await fillerDB.getPrerollsFromChannel(brandChannel);
+        let lineup = helperFuncs.createLineup(prog, brandChannel, fillers, prerolls, isFirst)
         lineupItem = lineup.shift();
       }
 

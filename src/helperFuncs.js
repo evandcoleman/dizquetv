@@ -12,6 +12,7 @@ const SLACK = require('./constants').SLACK;
 const randomJS = require("random-js");
 const Random = randomJS.Random;
 const random = new Random( randomJS.MersenneTwister19937.autoSeed() );
+const getShowData = require("./services/get-show-data")();
 
 const CHANNEL_CONTEXT_KEYS = [
     "disableFillerOverlay",
@@ -70,7 +71,7 @@ function getCurrentProgramAndTimeElapsed(date, channel) {
     }
 }
 
-function createLineup(obj, channel, fillers, isFirst) {
+function createLineup(obj, channel, fillers, prerolls, isFirst) {
     let timeElapsed = obj.timeElapsed
     // Start time of a file is never consistent unless 0. Run time of an episode can vary. 
     // When within 30 seconds of start time, just make the time 0 to smooth things out
@@ -100,36 +101,58 @@ function createLineup(obj, channel, fillers, isFirst) {
         let remaining = activeProgram.duration - timeElapsed;
         //look for a random filler to play
         let filler = null;
+        let preroll = null;
         let special = null;
+        let { nextProgram } = getCurrentProgramAndTimeElapsed(new Date(), channel);
+        let hasPrerollForNext = false
+        if (nextProgram) {
+            let showData = getShowData(nextProgram)
+            hasPrerollForNext = prerolls.findIndex((x) => x.showId === showData.showId) > -1;
+        }
+        if (hasPrerollForNext) {
+            let filteredPrerolls = prerolls.filter((x) => x.content[0].duration <= remaining + SLACK);
+            if (filteredPrerolls.length > 0) {
+                preroll = filteredPrerolls[Math.floor(Math.random() * filteredPrerolls.length)];
+                if (preroll) {
+                    preroll = preroll.content[0];
+                }
+            }
+        }
 
-            if ( (channel.offlineMode === 'clip') && (channel.fallback.length != 0) ) {
-                special = JSON.parse(JSON.stringify(channel.fallback[0]));
-            }
-            let randomResult = pickRandomWithMaxDuration(channel, fillers, remaining + (isFirst? (7*24*60*60*1000) : 0) );
-            filler = randomResult.filler;
-            if (filler == null && (typeof(randomResult.minimumWait) !== undefined) && (remaining > randomResult.minimumWait) ) {
-                remaining = randomResult.minimumWait;
-            }
+        let prerollDuration = preroll?.duration || 0;
+
+        if ( (channel.offlineMode === 'clip') && (channel.fallback.length != 0) ) {
+            special = JSON.parse(JSON.stringify(channel.fallback[0]));
+        }
+
+        let randomResult = pickRandomWithMaxDuration(channel, fillers, (remaining - prerollDuration) + (isFirst? (7*24*60*60*1000) : 0) );
+        filler = randomResult.filler;
+        if (filler == null && (typeof(randomResult.minimumWait) !== undefined) && ((remaining - prerollDuration) > randomResult.minimumWait) ) {
+            remaining = randomResult.minimumWait;
+        }
 
         let isSpecial = false;
         if (filler == null) {
             filler = special;
             isSpecial = true;
         }
-        if (filler != null) {
+
+        if (filler != null && (preroll == null || remaining > prerollDuration)) {
             let fillerstart = 0;
             if (isSpecial) {
-                if (filler.duration > remaining) {
-                    fillerstart = filler.duration - remaining;
+                if (filler.duration > (remaining - prerollDuration)) {
+                    fillerstart = filler.duration - remaining - prerollDuration;
                 } else {
                     ffillerstart = 0;
                 }
-            } else if(isFirst) {
-                fillerstart = Math.max(0, filler.duration - remaining);
+            } else if (isFirst && preroll == null) {
+                fillerstart = Math.max(0, filler.duration - remaining - prerollDuration);
                 //it's boring and odd to tune into a channel and it's always
                 //the start of a commercial.
                 let more = Math.max(0, filler.duration - fillerstart - 15000 - SLACK);
                 fillerstart +=  random.integer(0, more);
+            } else if (isFirst) {
+                fillerstart = filler.duration - Math.max(1, Math.min(filler.duration - fillerstart, remaining - prerollDuration));
             }
             lineup.push({   // just add the video, starting at 0, playing the entire duration
                 type: 'commercial',
@@ -139,7 +162,7 @@ function createLineup(obj, channel, fillers, isFirst) {
                 file: filler.file,
                 ratingKey: filler.ratingKey,
                 start: fillerstart,
-                streamDuration: Math.max(1, Math.min(filler.duration - fillerstart, remaining) ),
+                streamDuration: Math.max(1, Math.min(filler.duration - fillerstart, remaining - prerollDuration) ),
                 duration: filler.duration,
                 fillerId: filler.fillerId,
                 beginningOffset: beginningOffset,
@@ -148,6 +171,47 @@ function createLineup(obj, channel, fillers, isFirst) {
             });
             return lineup;
         }
+
+        if (preroll) {
+            let prerollStart = 0;
+            if (isFirst) {
+                prerollStart = Math.max(0, preroll.duration - remaining);
+                //it's boring and odd to tune into a channel and it's always
+                //the start of a commercial.
+                let more = Math.max(0, preroll.duration - prerollStart - 15000 - SLACK);
+                prerollStart +=  random.integer(0, more);
+            }
+
+            let duration = Math.max(1, Math.min(preroll.duration - prerollStart, remaining) );
+
+            if (remaining - prerollDuration > 0) {
+                lineup.push({
+                    type: 'offline',
+                    title: 'Channel Offline',
+                    streamDuration: Math.max(0, remaining - duration),
+                    beginningOffset: 0,
+                    duration: Math.max(0, remaining - duration),
+                    start: 0
+                });
+            }
+            lineup.push({   // just add the video, starting at 0, playing the entire duration
+                type: 'commercial',
+                title: preroll.title,
+                key: preroll.key,
+                plexFile: preroll.plexFile,
+                file: preroll.file,
+                ratingKey: preroll.ratingKey,
+                start: prerollStart,
+                streamDuration: duration,
+                duration: preroll.duration,
+                fillerId: preroll.fillerId,
+                beginningOffset: beginningOffset,
+                serverKey: preroll.serverKey,
+                remaining: remaining,
+            });
+            return lineup;
+        }
+
         // pick the offline screen
         remaining = Math.min(remaining, 10*60*1000);
         //don't display the offline screen for longer than 10 minutes. Maybe the
