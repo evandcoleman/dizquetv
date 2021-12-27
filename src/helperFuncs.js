@@ -119,7 +119,7 @@ function createLineup(obj, channel, fillers, prerolls, isFirst) {
             }
         }
 
-        let prerollDuration = preroll?.duration || 0;
+        let prerollDuration = (preroll || {}).duration || 0;
 
         if ( (channel.offlineMode === 'clip') && (channel.fallback.length != 0) ) {
             special = JSON.parse(JSON.stringify(channel.fallback[0]));
