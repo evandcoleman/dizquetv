@@ -1133,6 +1133,7 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
                 }
                 scope.channel.programs = scope.channel.programs.concat(selectedPrograms)
                 updateChannelDuration()
+                scope.refreshPrerollStuff()
                 setTimeout(
                     () => {
                         scope.$apply( () => {
@@ -1423,35 +1424,9 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
             }
 
             let prerollOptionsFor = (index) => {
-                let usedFillerLists = {};
-                let addedFillerLists = {};
-                for (let i = 0; i < scope.channel.prerollCollections.length; i++) {
-                    if (scope.channel.prerollCollections[i].fillerId != 'none' && i != index) {
-                        usedFillerLists[scope.channel.prerollCollections[i].fillerId ] = true;
-                    }
-                }
                 let options = [];
                 for (let i = 0; i < scope.prerollOptions.length; i++) {
-                    if ( usedFillerLists[scope.prerollOptions[i].fillerId] !== true) {
-                        addedFillerLists[scope.prerollOptions[i].fillerId] = true;
-                        options.push( scope.prerollOptions[i] );
-                    }
-                }
-                if (scope.channel.prerollCollections[index].fillerId == 'none') {
-                    addedFillerLists['none'] = true;
-                    options.push( {
-                        fillerId: 'none',
-                        name: 'Add a filler list...',
-                    } );
-                }
-                if ( addedFillerLists[scope.channel.prerollCollections[index].fillerId] !== true ) {
-                    let option = scope.channel.prerollCollections[index].options?.find((x) => x.fillerId == scope.channel.prerollCollections[index].fillerId);
-                    if (option) {
-                        options.push( {
-                            fillerId: scope.channel.prerollCollections[index].fillerId,
-                            name: `[${option.name}]`,
-                        } );
-                    }
+                    options.push( scope.prerollOptions[i] );
                 }
 
                 let usedShows = {};
@@ -1465,6 +1440,7 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
                 scope.channel.programs
                     .map( getShowData )
                     .filter( data => data.hasShow )
+                    .filter((v,i,a) => a.findIndex(t => (t.showId === v.showId)) === i)
                     .forEach( x => {
                         if ( usedShows[x.showId] !== true) {
                             addedShows[x.showId] = true;
@@ -1474,13 +1450,17 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
 
                 if (scope.channel.prerollCollections[index].showId == 'none') {
                     addedShows['none'] = true;
+                    shows.push({
+                        showId: 'none',
+                        showDisplayName: 'Add a preroll to...',
+                    });
                 }
                 if (addedShows[scope.channel.prerollCollections[index].showId] !== true) {
                     let show = scope.channel.prerollCollections[index].shows?.find((x) => x.showId == scope.channel.prerollCollections[index].showId);
                     if (show) {
                         shows.push({
                             showId: scope.channel.prerollCollections[index].showId,
-                            name: `[${show.showDisplayName}]`,
+                            showDisplayName: `[${show.showDisplayName}]`,
                         });
                     }
                 }
@@ -1528,7 +1508,6 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
                 }
                 addAddPreroll();
                 refreshIndividualOptions();
-                console.log(scope.channel.prerollCollections);
             }
 
             let updatePercentages = () => {
@@ -1558,7 +1537,7 @@ module.exports = function ($timeout, $location, dizquetv, resolutionOptions, get
             }
 
             let addAddPreroll = () => {
-                if ( (scope.channel.prerollCollections.length == 0) || (scope.channel.prerollCollections[scope.channel.prerollCollections.length-1].fillerId !== 'none') ) {
+                if ( (scope.channel.prerollCollections.length == 0) || (scope.channel.prerollCollections[scope.channel.prerollCollections.length-1].showId !== 'none') ) {
                     scope.channel.prerollCollections.push ( {
                         'fillerId': 'none',
                         'showId': 'none',

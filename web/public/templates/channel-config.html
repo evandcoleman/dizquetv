@@ -669,15 +669,6 @@
     
                             <div class="form-row" ng-repeat = "x in channel.prerollCollections" track-by = "$index">
                                 <div class='form-group col-md-5'>
-                                    <label ng-if="$index==0" for="prerollselect{{$index}}">List</label>
-                                    <select
-                                        id="prerollselect{{$index}}" class="custom-select form-control"
-                                        ng-model="x.fillerId" ng-options="o.fillerId as o.name for o in x.options"
-                                        ng-change="refreshPrerollStuff()"
-                                        >
-                                    </select>
-                                </div>
-                                <div class='form-group col-md-5' ng-if="x.fillerId !== &apos;none&apos; &amp;&amp; channel.prerollCollections.length &gt; 1">
                                     <label ng-if="$index==0" for="prerollforselect{{$index}}">Play Before</label>
                                     <select
                                         id="prerollforselect{{$index}}" class="custom-select form-control"
@@ -686,7 +677,16 @@
                                         >
                                     </select>
                                 </div>
-                                <div class='form-group col-md-1' ng-if="x.fillerId !== &apos;none&apos;" >
+                                <div class='form-group col-md-5' ng-if="x.showId !== &apos;none&apos; &amp;&amp; channel.prerollCollections.length &gt; 1">
+                                    <label ng-if="$index==0" for="prerollselect{{$index}}">List</label>
+                                    <select
+                                        id="prerollselect{{$index}}" class="custom-select form-control"
+                                        ng-model="x.fillerId" ng-options="o.fillerId as o.name for o in x.options"
+                                        ng-change="refreshPrerollStuff()"
+                                        >
+                                    </select>
+                                </div>
+                                <div class='form-group col-md-1' ng-if="x.showId !== &apos;none&apos;" >
                                     <label ng-if="$index==0" for="deletePreroll{{$index}}">-</label>
                                     <button id='deletePreroll{{$index}}' class='btn btn-link form-control' ng-click='deletePrerollList($index)' >
                                         <i class='text-danger fa fa-trash-alt'></i>
