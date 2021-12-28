@@ -208,7 +208,7 @@ class FillerDB {
             }
         };
         return await Promise.all(
-            channel.prerollCollections.filter((x) => x.showId != 'none' && x.fillerId != 'none').map(loadChannelPreroll)
+            (channel.prerollCollections || []).filter((x) => x.showId != 'none' && x.fillerId != 'none').map(loadChannelPreroll)
         );
     }
 
