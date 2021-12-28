@@ -110,7 +110,7 @@ function createLineup(obj, channel, fillers, prerolls, isFirst) {
             hasPrerollForNext = prerolls.findIndex((x) => x.showId === showData.showId) > -1;
         }
         if (hasPrerollForNext) {
-            let filteredPrerolls = prerolls.filter((x) => x.content[0].duration <= remaining + SLACK);
+            let filteredPrerolls = prerolls.filter((x) => x.content[0].duration <= remaining + (isFirst ? (7 * 24 * 60 * 60 * 1000) : SLACK));
             if (filteredPrerolls.length > 0) {
                 preroll = filteredPrerolls[Math.floor(Math.random() * filteredPrerolls.length)];
                 if (preroll) {
@@ -172,7 +172,7 @@ function createLineup(obj, channel, fillers, prerolls, isFirst) {
             return lineup;
         }
 
-        if (preroll) {
+        if (preroll && remaining - prerollDuration <= 5000) {
             let prerollStart = 0;
             if (isFirst) {
                 prerollStart = Math.max(0, preroll.duration - remaining);
