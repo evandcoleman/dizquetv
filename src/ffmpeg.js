@@ -571,6 +571,9 @@ class FFMPEG extends events.EventEmitter {
                             `-maxrate:v`, `${this.opts.videoBitrate}k`,
                             `-bufsize:v`, `${this.opts.videoBufSize}k`
                 );
+                if (this.opts.aditionalVideoFlags) {
+                    ffmpegArgs = ffmpegArgs.concat(this.opts.aditionalVideoFlags.split(' '))
+                }
             }
             if ( transcodeAudio ) {
                 // add the audio encoder flags
@@ -584,6 +587,9 @@ class FFMPEG extends events.EventEmitter {
                         `-ac`, `${this.opts.audioChannels}`,
                         `-ar`, `${this.opts.audioSampleRate}k`
                     );
+                }
+                if (this.opts.aditionalAudioFlags) {
+                    ffmpegArgs = ffmpegArgs.concat(this.opts.aditionalAudioFlags.split(' '))
                 }
             }
             if (transcodeAudio && transcodeVideo) {
@@ -629,6 +635,7 @@ class FFMPEG extends events.EventEmitter {
         }
             
         ffmpegArgs.push(`-f`, `mpegts`, `pipe:1`)
+        console.log('[FFMPEG]', this.ffmpegPath, ffmpegArgs.join(' '));
 
         let doLogs = this.opts.logFfmpeg && !isConcatPlaylist;
         if (this.hasBeenKilled) {
