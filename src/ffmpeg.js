@@ -571,8 +571,15 @@ class FFMPEG extends events.EventEmitter {
                             `-maxrate:v`, `${this.opts.videoBitrate}k`,
                             `-bufsize:v`, `${this.opts.videoBufSize}k`
                 );
-                if (this.opts.aditionalVideoFlags) {
-                    ffmpegArgs = ffmpegArgs.concat(this.opts.aditionalVideoFlags.split(' '))
+                if (streamStats.videoProfile === 'main 10') {
+                    ffmpegArgs.push(
+                        '-pix_fmt', 'yuv420p',
+                        '-color_trc', 'smpte2084',
+                        '-color_primaries', 'bt2020'
+                    );
+                }
+                if (this.opts.additionalVideoFlags) {
+                    ffmpegArgs = ffmpegArgs.concat(this.opts.additionalVideoFlags.split(' '))
                 }
             }
             if ( transcodeAudio ) {
@@ -588,8 +595,8 @@ class FFMPEG extends events.EventEmitter {
                         `-ar`, `${this.opts.audioSampleRate}k`
                     );
                 }
-                if (this.opts.aditionalAudioFlags) {
-                    ffmpegArgs = ffmpegArgs.concat(this.opts.aditionalAudioFlags.split(' '))
+                if (this.opts.additionalAudioFlags) {
+                    ffmpegArgs = ffmpegArgs.concat(this.opts.additionalAudioFlags.split(' '))
                 }
             }
             if (transcodeAudio && transcodeVideo) {

@@ -238,6 +238,7 @@ lang=en`
             streams.forEach(function (_stream, $index) {
                 // Video
                 let stream = _stream;
+                console.log('[STREAM]', JSON.stringify(stream, null, 2));
                 if (stream["streamType"] == "1") {
                     if ( this.videoIsDirect === true && typeof(this.directInfo) !== 'undefined') {
                         stream = this.directInfo.MediaContainer.Metadata[0].Media[0].Part[0].Stream[$index];
@@ -262,6 +263,7 @@ lang=en`
                     // 29.9999999 & 30 don't match.
                     ret.videoDecision = (typeof stream.decision === 'undefined') ? 'copy' : stream.decision;
                     ret.videoScanType = stream.scanType;
+                    ret.videoProfile = stream.profile
                 }
                 // Audio. Only look at stream being used
                 if (stream["streamType"] == "2" && stream["selected"] == "1") {
