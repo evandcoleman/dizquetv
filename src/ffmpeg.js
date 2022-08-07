@@ -112,6 +112,10 @@ class FFMPEG extends events.EventEmitter {
              `-threads`, isConcatPlaylist? 1 : this.opts.threads,
                           `-fflags`, `+genpts+discardcorrupt+igndts`];
         let stillImage = false;
+
+        if (this.opts.videoEncoder.indexOf('vaapi') > -1) {
+            ffmpegArgs.push('-hwaccel', 'vaapi', '-hwaccel_output_format', 'vaapi', '-vaapi_device', '/dev/dri/renderD128');
+        }
         
         if (
             (limitRead === true)
@@ -168,6 +172,10 @@ class FFMPEG extends events.EventEmitter {
             var videoIndex = 'v';
             var audioComplex = `;[${audioFile}:${audioIndex}]anull[audio]`;
             var videoComplex = `;[${videoFile}:${videoIndex}]null[video]`;
+
+            if (this.opts.videoEncoder.indexOf('vaapi') > -1) {
+                videoComplex += `;format=nv12,hwupload`
+            }
             // Depending on the options we will apply multiple filters
             // each filter modifies the current video stream. Adds a filter to
             // the videoComplex variable. The result of the filter becomes the 
